@@ -3,4 +3,5 @@
 ##примерный стек технологий:
 - BackEnd: Spring + kotlin
 - FrontEnd: React + TS
-- DB: PostgreSQL
+- DB: PostgreSQL + кубернатес
+- docker
