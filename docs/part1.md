@@ -130,10 +130,12 @@ flowchart TB
 
 ### 6) Предложить архитектуру будущей системы.
 ![img](./assets/structure.png)
-
+⬆ крч вот это вот надо заебашить на meramaid по хорошему
 #### Примерный стек технологий:
 - BackEnd: Spring + kotlin
 - FrontEnd: React + TS
 - DB: PostgreSQL + кубернатес / MongoDB / Redis
 - docker
+
+
 
