@@ -129,4 +129,11 @@ flowchart TB
 ```
 
 ### 6) Предложить архитектуру будущей системы.
+![img](./assets/structure.png)
+
+#### Примерный стек технологий:
+- BackEnd: Spring + kotlin
+- FrontEnd: React + TS
+- DB: PostgreSQL + кубернатес / MongoDB / Redis
+- docker
 
