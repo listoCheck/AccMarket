@@ -127,6 +127,9 @@ flowchart TB
 
     UC_CreateListing --> UC_Moderate
 ```
+
+
+### 6) Предложить архитектуру будущей системы.
 ```mermaid
 flowchart TB
     A[Redis] --> B[Сервис авторизации]
@@ -150,10 +153,6 @@ flowchart TB
     A3 --> D
     A4 --> D
 ```
-
-### 6) Предложить архитектуру будущей системы.
-![img](./assets/structure.png)
-⬆ крч вот это вот надо заебашить на meramaid по хорошему
 #### Примерный стек технологий:
 - BackEnd: Spring + kotlin
 - FrontEnd: React + TS
