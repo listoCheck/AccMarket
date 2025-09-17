@@ -127,6 +127,29 @@ flowchart TB
 
     UC_CreateListing --> UC_Moderate
 ```
+```mermaid
+flowchart TB
+    A[Redis] --> B[Сервис авторизации]
+    C[PostgreSQL] --> B
+    D[MongoDB] --> E[Изменения аккаунта]
+    D --> G[основная платформа для манипуляций с аккаунтами]
+
+    B --> E
+    B --> G
+    E --> G
+    G --> H[SteamFreeMoneyAPI]
+    I[админская панель] --> G
+
+    subgraph Примечания
+        A1[хранилище токенов]
+        A3[хранилище профилей]
+        A4[инфра про объявления]
+    end
+
+    A1 --> A
+    A3 --> D
+    A4 --> D
+```
 
 ### 6) Предложить архитектуру будущей системы.
 ![img](./assets/structure.png)
