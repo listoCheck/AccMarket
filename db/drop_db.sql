@@ -1,0 +1,1 @@
+DROP DATABASE IF EXISTS game_ads_platform;
