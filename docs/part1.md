@@ -300,7 +300,8 @@ flowchart TB
 ```
 
 ### 6) Предложить архитектуру будущей системы.
-![img](./assets/structure.png)
+<img width="1409" height="898" alt="image" src="https://github.com/user-attachments/assets/8a88c9af-f9fa-4a11-a7f7-fdabe02d0334" />
+
 
 #### Примерный стек технологий:
 - BackEnd: Spring + kotlin
