@@ -1,7 +1,8 @@
 1) Сформировать ER-модель базы данных (на основе описаний предметной области и прецедентов из предыдущего этапа).
-![img](assets/ER-diagram.png)
+<img width="1054" height="621" alt="image" src="https://github.com/user-attachments/assets/b0affa64-9234-40b3-b093-915d3d02aaf2" />
+
 `https://app.diagrams.net/?splash=0#G1RZmI-VwoaCHy-IRG55PZ_vbfvuN7rO6r#%7B%22pageId%22%3A%22p5V-Lhk9Jt5Xqg_NzX77%22%7D`
-2) На основе ER-модели построить даталогическую модель.
+3) На основе ER-модели построить даталогическую модель.
 ```mermaid
 erDiagram
     USERS {
