@@ -1,4 +1,4 @@
-package com.example.accmarket.models
+package com.example.accmarket.auth.models
 
 import jakarta.persistence.*
 import java.util.*
@@ -7,6 +7,7 @@ import java.util.*
 @Table(name = "users")
 data class User(
     @Id
+    @Column(columnDefinition = "UUID")
     val id: UUID = UUID.randomUUID(),
 
     @Column(unique = true, nullable = false)
@@ -20,6 +21,6 @@ data class User(
     @Column(name = "role")
     var roles: Set<String> = setOf("USER"),
 
-    @Column(name = "token", length = 1000)
-    var token: String
+    @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var token: Token? = null
 )

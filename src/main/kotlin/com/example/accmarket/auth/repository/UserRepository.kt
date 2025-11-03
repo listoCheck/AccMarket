@@ -1,6 +1,6 @@
-package com.example.accmarket.repository
+package com.example.accmarket.auth.repository
 
-import com.example.accmarket.models.User
+import com.example.accmarket.auth.models.User
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query

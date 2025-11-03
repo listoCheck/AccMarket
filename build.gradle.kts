@@ -37,6 +37,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
     implementation("com.netflix.graphql.dgs.codegen:graphql-dgs-codegen-gradle:7.0.3")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+
     testImplementation("org.springframework.security:spring-security-test")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
