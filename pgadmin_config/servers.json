@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "ACC",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "${DB_NAME}",
+      "Username": "${DB_USER}",
+      "Password": "${DB_PASS}"
+    }
+  }
+}

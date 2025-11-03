@@ -34,6 +34,7 @@ services:
         condition: service_healthy
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin_config:/var/lib/pgadmin/pgadmin4
     networks:
       - IS-labs
 
