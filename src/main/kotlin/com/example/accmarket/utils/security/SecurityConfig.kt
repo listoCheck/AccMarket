@@ -22,8 +22,14 @@ class SecurityConfig {
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/auth/register", "/auth/login", "/auth/logout").permitAll()
+                    .requestMatchers(
+                        "/core/make-advertisement",
+                        "/core/edit-advertisement",
+                        "/core",
+                    ).permitAll()
                     .anyRequest().authenticated()
             }
+
         return http.build()
     }
 }
