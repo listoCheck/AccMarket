@@ -1,4 +1,4 @@
-package com.example.accmarket.auth.models
+package com.example.accmarket.utils.models
 
 data class Response(
     val code: Int = 200,

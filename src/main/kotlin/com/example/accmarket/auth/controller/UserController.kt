@@ -1,7 +1,7 @@
 package com.example.accmarket.auth.controller
 
-import com.example.accmarket.auth.models.Response
-import com.example.accmarket.auth.models.dto.UserDto
+import com.example.accmarket.utils.models.Response
+import com.example.accmarket.auth.models.DTO.UserDto
 import com.example.accmarket.auth.service.UserService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

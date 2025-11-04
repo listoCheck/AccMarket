@@ -1,6 +1,6 @@
 package com.example.accmarket.auth.service
 
-import com.example.accmarket.auth.models.Response
+import com.example.accmarket.utils.models.Response
 import com.example.accmarket.auth.models.Token
 import com.example.accmarket.auth.models.User
 import com.example.accmarket.auth.repository.TokenRepository

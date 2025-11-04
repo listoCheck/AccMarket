@@ -1,4 +1,4 @@
-package com.example.accmarket.auth.models.dto
+package com.example.accmarket.auth.models.DTO
 
 data class UserDto(
     val username: String,
