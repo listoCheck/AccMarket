@@ -19,7 +19,8 @@ data class Token(
     var refreshToken: String,
 
     @Column(name = "refresh_required", nullable = false)
-    var refreshRequired: Boolean = false,
+    @Temporal(TemporalType.TIMESTAMP)
+    var refreshRequired: Date,
 
     @Column(name = "is_active", nullable = false)
     var isActive: Boolean = true

@@ -8,6 +8,7 @@ import com.example.accmarket.auth.repository.UserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import com.example.accmarket.utils.JWT.JwtProvider
+import java.util.Date
 
 @Service
 class UserService(
@@ -22,7 +23,11 @@ class UserService(
         }
         val user = User(username = username, password = passwordEncoder.encode(password))
         val refreshToken = jwtProvider.createToken(username, listOf("admin"))
-        user.token = Token(user = user, refreshToken = refreshToken)
+        user.token = Token(
+            user = user,
+            refreshToken = refreshToken,
+            refreshRequired = Date(System.currentTimeMillis() + 30 * 60 * 60 * 24 * 1000L)
+        )
         userRepository.save(user)
         return Response(code = 200, body = mapOf("token" to refreshToken), message = "Success")
     }
@@ -53,7 +58,7 @@ class UserService(
         }
 
         tokenEntity.isActive = false
-        tokenEntity.refreshRequired = true
+        tokenEntity.refreshRequired = Date(System.currentTimeMillis() + 30 * 60 * 60 * 24 * 1000L)
         tokenRepository.save(tokenEntity)
 
         return Response(code = 200, message = "Logout successful")
