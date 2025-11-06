@@ -3,17 +3,20 @@ package com.example.accmarket.auth.controller
 import com.example.accmarket.auth.models.DTO.UserDto
 import com.example.accmarket.auth.service.UserService
 import com.example.accmarket.utils.models.Response
+import com.example.accmarket.utils.security.SecurityConfig
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every
 import com.ninjasquad.springmockk.MockkBean
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.post
 
 @WebMvcTest(UserController::class)
+@Import(SecurityConfig::class)
 class UserControllerTests @Autowired constructor(
     val mockMvc: MockMvc
 ) {
