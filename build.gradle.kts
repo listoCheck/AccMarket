@@ -33,18 +33,20 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
     implementation("com.netflix.graphql.dgs.codegen:graphql-dgs-codegen-gradle:7.0.3")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("com.graphql-java:java-dataloader:3.3.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-test") {
+        exclude(group = "org.mockito")
+    }
 
     testImplementation("org.springframework.security:spring-security-test")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     runtimeOnly("org.postgresql:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
