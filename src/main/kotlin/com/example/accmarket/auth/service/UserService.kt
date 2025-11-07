@@ -22,7 +22,7 @@ class UserService(
             return Response(code = 409, message = "This login already exists")
         }
         val user = User(username = username, password = passwordEncoder.encode(password))
-        val refreshToken = jwtProvider.createToken(username, listOf("admin"))
+        val refreshToken = jwtProvider.createToken(username, listOf("USER"))
         user.token = Token(
             user = user,
             refreshToken = refreshToken,
