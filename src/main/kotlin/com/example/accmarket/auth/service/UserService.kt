@@ -22,7 +22,7 @@ class UserService(
             return Response(code = 409, message = "This login already exists")
         }
         val user = User(username = username, password = passwordEncoder.encode(password))
-        val refreshToken = jwtProvider.createToken(username, listOf("admin"))
+        val refreshToken = jwtProvider.createRefreshToken(username, listOf("admin"))
         user.token = Token(
             user = user,
             refreshToken = refreshToken,
@@ -37,9 +37,10 @@ class UserService(
             ?: return Response(code = 400, message = "Incorrect login or password")
 
         return if (passwordEncoder.matches(password, user.password)) {
-            val token = jwtProvider.createToken(username, listOf("admin"))
-            tokenRepository.updateUserToken(user.id, token)
-            Response(code = 200, body = mapOf("token" to token), message = "Success")
+            val refreshToken = jwtProvider.createRefreshToken(username, listOf("USER"))
+            val accessToken = jwtProvider.createAccessToken(username, listOf("USER"))
+            tokenRepository.updateUserToken(user.id, refreshToken)
+            Response(code = 200, body = mapOf("accessToken" to accessToken, "refreshToken" to refreshToken), message = "Success")
         } else {
             Response(code = 400, message = "Incorrect login or password")
         }
@@ -50,9 +51,9 @@ class UserService(
         val user = userRepository.findByUsername(username)
             ?: return Response(code = 400, message = "User not found")
 
+        val tokenCheck = jwtProvider.verifyToken(token)
+        if (!tokenCheck) return Response(code = 400, message = "Token not found")
         val tokenEntity = tokenRepository.findByUserId(user.id)
-            ?: return Response(code = 400, message = "Token not found")
-
         if (tokenEntity.refreshToken != token) {
             return Response(code = 403, message = "Invalid token")
         }

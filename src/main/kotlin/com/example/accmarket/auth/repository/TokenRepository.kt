@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 interface TokenRepository : JpaRepository<Token, UUID> {
-    fun findByUserId(userId: UUID): Token?
+
+    fun findByUserId(userId: UUID): Token
+
     @Transactional
     @Modifying
     @Query("UPDATE Token t SET t.refreshToken = :token WHERE t.userId = :id")
