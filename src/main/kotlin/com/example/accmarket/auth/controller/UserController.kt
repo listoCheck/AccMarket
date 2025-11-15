@@ -27,4 +27,9 @@ class UserController(
     fun logout(@RequestBody user: UserDto): Response {
         return userService.logout(user.username, user.token ?: "")
     }
+
+    @PostMapping("/update-token")
+    fun updateToken(@RequestBody user: UserDto): Response {
+        return userService.updateAccessToken(user.username, user.token ?: "")
+    }
 }

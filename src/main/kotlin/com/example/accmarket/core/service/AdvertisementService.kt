@@ -8,6 +8,7 @@ import com.example.accmarket.core.models.DTO.AdvertisementDTO
 import com.example.accmarket.core.models.DTO.DeleteAdvertisementDTO
 import com.example.accmarket.core.models.Type
 import com.example.accmarket.core.repository.AdvertisementRepository
+import com.example.accmarket.utils.JWT.JwtProvider
 import com.example.accmarket.utils.models.Response
 import org.hibernate.query.Page.page
 import org.springframework.data.domain.Page
@@ -23,12 +24,13 @@ class AdvertisementService(
     private val advertisementRepository: AdvertisementRepository,
     private val userRepository: UserRepository,
     private val tokenService: TokenService,
+    private val jwtProvider: JwtProvider,
 ) {
     fun makeAdvertisement(request: AdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
 
-        if (!tokenService.checkToken(request.token))
+        if (!jwtProvider.verifyToken(request.token.toString()))
             return Response(code = 400, message = "Token not found or invalid")
 
         val adv = Advertisement(
@@ -51,7 +53,7 @@ class AdvertisementService(
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
 
-        if (!tokenService.checkToken(request.token))
+        if (!jwtProvider.verifyToken(request.token.toString()))
             return Response(code = 400, message = "Token not found or invalid")
 
         val adv = advertisementRepository.findById(request.advertisementId!!)
@@ -74,7 +76,7 @@ class AdvertisementService(
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
 
-        if (!tokenService.checkToken(request.token))
+        if (!jwtProvider.verifyToken(request.token.toString()))
             return Response(code = 400, message = "Token not found or invalid")
 
         val adv = advertisementRepository.findById(request.advertisementId)
