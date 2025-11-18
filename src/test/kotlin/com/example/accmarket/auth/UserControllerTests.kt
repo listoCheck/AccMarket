@@ -2,7 +2,7 @@ package com.example.accmarket.auth.controller
 
 import com.example.accmarket.auth.models.DTO.UserDto
 import com.example.accmarket.auth.service.UserService
-import com.example.accmarket.utils.models.Response
+import com.example.accmarket.utils.models.response.Response
 import com.example.accmarket.utils.security.SecurityConfig
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.mockk.every

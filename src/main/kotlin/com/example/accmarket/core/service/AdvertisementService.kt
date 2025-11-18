@@ -9,7 +9,7 @@ import com.example.accmarket.core.models.DTO.DeleteAdvertisementDTO
 import com.example.accmarket.core.models.Type
 import com.example.accmarket.core.repository.AdvertisementRepository
 import com.example.accmarket.utils.JWT.JwtProvider
-import com.example.accmarket.utils.models.Response
+import com.example.accmarket.utils.models.response.Response
 import org.hibernate.query.Page.page
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -54,7 +54,7 @@ class AdvertisementService(
             ?: return Response(code = 400, message = "User not found")
 
         if (!jwtProvider.verifyToken(request.token.toString()))
-            return Response(code = 400, message = "Token not found or invalid")
+            return Response(code = 401, message = "Token not found or invalid")
 
         val adv = advertisementRepository.findById(request.advertisementId!!)
             .orElse(null) ?: return Response(code = 404, message = "Advertisement not found")
