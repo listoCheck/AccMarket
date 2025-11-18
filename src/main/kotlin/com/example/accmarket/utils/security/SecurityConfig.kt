@@ -27,6 +27,7 @@ class SecurityConfig {
                         "/core/edit-advertisement",
                         "/core",
                     ).permitAll()
+                    .requestMatchers("/admin/**").authenticated()
                     .anyRequest().authenticated()
             }
 
