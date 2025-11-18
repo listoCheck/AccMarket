@@ -10,8 +10,3 @@ data class RoleManagementDTO(
     val adminSecret: String? = null
 )
 
-data class AssignAdminRoleDTO(
-    val username: String,
-    val token: UUID,
-    val adminSecret: String
-)

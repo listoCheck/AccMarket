@@ -1,12 +1,12 @@
 // src/main/kotlin/com/example/accmarket/rolemanagement/service/RoleManagementService.kt
 package com.example.accmarket.rolemanagement.service
 
+import com.example.accmarket.admin.models.DTO.AssignAdminRoleDTO
 import com.example.accmarket.auth.models.User
 import com.example.accmarket.auth.repository.UserRepository
 import com.example.accmarket.auth.service.TokenService
 import com.example.accmarket.rolemanagement.models.AdminSecret
 import com.example.accmarket.rolemanagement.repository.AdminSecretRepository
-import com.example.accmarket.rolemanagement.models.DTO.AssignAdminRoleDTO
 import com.example.accmarket.rolemanagement.models.DTO.RoleManagementDTO
 import com.example.accmarket.utils.models.Response
 import org.springframework.stereotype.Service
