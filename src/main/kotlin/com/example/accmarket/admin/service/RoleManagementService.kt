@@ -8,7 +8,9 @@ import com.example.accmarket.auth.service.TokenService
 import com.example.accmarket.rolemanagement.models.AdminSecret
 import com.example.accmarket.rolemanagement.repository.AdminSecretRepository
 import com.example.accmarket.rolemanagement.models.DTO.RoleManagementDTO
-import com.example.accmarket.utils.models.Response
+import com.example.accmarket.utils.JWT.JwtProvider
+import com.example.accmarket.utils.models.response.Response
+import com.example.accmarket.utils.models.response.ResponseHandler
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -16,19 +18,21 @@ import java.util.*
 class RoleManagementService(
     private val userRepository: UserRepository,
     private val tokenService: TokenService,
-    private val adminSecretRepository: AdminSecretRepository
+    private val adminSecretRepository: AdminSecretRepository,
+    private val jwtProvider: JwtProvider
 ) {
 
     fun assignAdminRole(request: AssignAdminRoleDTO): Response {
-        if (!tokenService.checkToken(request.token)) {
-            return Response(code = 401, message = "Invalid token")
-        }
+
+        val tokenCheck = jwtProvider.verifyToken(request.token.toString())
+        if (!tokenCheck) return ResponseHandler.invalidToken()
+
 
         val user = userRepository.findByUsername(request.username)
-            ?: return Response(code = 404, message = "User not found")
+            ?: return ResponseHandler.userNotFound()
 
         if (!adminSecretRepository.isValidSecret(request.adminSecret)) {
-            return Response(code = 403, message = "Invalid admin secret")
+            return ResponseHandler.invalidAdminSecret()
         }
 
         val updatedRoles = user.roles.toMutableSet().apply {
@@ -41,41 +45,32 @@ class RoleManagementService(
     }
 
     fun getUserRoles(request: RoleManagementDTO): Response {
-        if (!tokenService.checkToken(request.token)) {
-            return Response(code = 401, message = "Invalid token")
-        }
+        val tokenCheck = jwtProvider.verifyToken(request.token.toString())
+        if (!tokenCheck) return ResponseHandler.invalidToken()
 
         val currentUser = userRepository.findByUsername(request.username)
-            ?: return Response(code = 404, message = "User not found")
+            ?: return ResponseHandler.userNotFound()
 
         if (!hasRoleManagementAccess(currentUser)) {
-            return Response(code = 403, message = "Insufficient permissions")
+            return ResponseHandler.insufficientPermissions()
         }
 
         val targetUsername = request.targetUsername ?: request.username
         val targetUser = userRepository.findByUsername(targetUsername)
-            ?: return Response(code = 404, message = "Target user not found")
+            ?: return ResponseHandler.targetUserNotFound()
 
-        return Response(
-            code = 200,
-            body = mapOf(
-                "username" to targetUser.username,
-                "roles" to targetUser.roles
-            ),
-            message = "Roles retrieved successfully"
-        )
+        return ResponseHandler.success(body = mapOf("username" to targetUser.username, "roles" to targetUser.roles))
     }
 
     fun updateUserRoles(request: RoleManagementDTO): Response {
-        if (!tokenService.checkToken(request.token)) {
-            return Response(code = 401, message = "Invalid token")
-        }
+        val tokenCheck = jwtProvider.verifyToken(request.token.toString())
+        if (!tokenCheck) return ResponseHandler.invalidToken()
 
         val currentUser = userRepository.findByUsername(request.username)
-            ?: return Response(code = 404, message = "User not found")
+            ?: return ResponseHandler.userNotFound()
 
         if (!hasRoleManagementAccess(currentUser)) {
-            return Response(code = 403, message = "Insufficient permissions")
+            return ResponseHandler.insufficientPermissions()
         }
 
         val targetUsername = request.targetUsername
@@ -121,11 +116,7 @@ class RoleManagementService(
             )
         }
 
-        return Response(
-            code = 200,
-            body = mapOf("users" to users),
-            message = "Users retrieved successfully"
-        )
+        return ResponseHandler.success(body = mapOf("users" to users))
     }
 
     private fun hasRoleManagementAccess(user: User): Boolean {

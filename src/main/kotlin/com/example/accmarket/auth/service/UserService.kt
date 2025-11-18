@@ -54,7 +54,7 @@ class UserService(
             ?: return ResponseHandler.userNotFound()
 
         val tokenCheck = jwtProvider.verifyToken(token)
-        if (!tokenCheck) return ResponseHandler.tokenNotFound()
+        if (!tokenCheck) return ResponseHandler.invalidToken()
         val tokenEntity = tokenRepository.findByUserId(user.id)
         if (tokenEntity.refreshToken != token) return ResponseHandler.invalidToken()
 
@@ -69,7 +69,7 @@ class UserService(
         val user = userRepository.findByUsername(username)
             ?: return ResponseHandler.userNotFound()
         val tokenCheck = jwtProvider.verifyToken(token)
-        if (!tokenCheck) return ResponseHandler.tokenNotFound()
+        if (!tokenCheck) return ResponseHandler.invalidToken()
         val tokenEntity = tokenRepository.findByUserId(user.id)
         if (tokenEntity.refreshToken != token) return ResponseHandler.invalidToken()
         val newAccessToken = jwtProvider.createAccessToken(username, listOf("USER"))

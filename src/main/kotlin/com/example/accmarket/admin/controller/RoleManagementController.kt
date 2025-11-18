@@ -3,7 +3,7 @@ package com.example.accmarket.rolemanagement.controller
 import com.example.accmarket.admin.models.DTO.AssignAdminRoleDTO
 import com.example.accmarket.rolemanagement.models.DTO.RoleManagementDTO
 import com.example.accmarket.rolemanagement.service.RoleManagementService
-import com.example.accmarket.utils.models.Response
+import com.example.accmarket.utils.models.response.Response
 import org.springframework.web.bind.annotation.*
 
 @RestController

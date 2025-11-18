@@ -23,7 +23,18 @@ object ResponseHandler {
         return Response(code = 403, message = "Invalid token")
     }
 
-    public fun success(message: String = "Success", body: Any? = null): Response {
+    fun success(message: String = "Success", body: Any? = null): Response {
         return Response(code = 200, message = message, body = body)
+    }
+
+    fun invalidAdminSecret(): Response {
+        return Response(code = 403, message = "Invalid admin secret")
+    }
+
+    fun insufficientPermissions(): Response {
+        return Response(code = 403, message = "Insufficient permissions")
+    }
+    fun targetUserNotFound(): Response {
+        return Response(code = 404, message = "Target user not found")
     }
 }
