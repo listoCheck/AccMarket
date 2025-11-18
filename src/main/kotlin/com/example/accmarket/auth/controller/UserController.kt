@@ -1,6 +1,6 @@
 package com.example.accmarket.auth.controller
 
-import com.example.accmarket.utils.models.Response
+import com.example.accmarket.utils.models.response.Response
 import com.example.accmarket.auth.models.DTO.UserDto
 import com.example.accmarket.auth.service.UserService
 import org.springframework.web.bind.annotation.PostMapping
@@ -26,5 +26,10 @@ class UserController(
     @PostMapping("/logout")
     fun logout(@RequestBody user: UserDto): Response {
         return userService.logout(user.username, user.token ?: "")
+    }
+
+    @PostMapping("/update-token")
+    fun updateToken(@RequestBody user: UserDto): Response {
+        return userService.updateAccessToken(user.username, user.token ?: "")
     }
 }

@@ -4,7 +4,7 @@ import AdvertisementResponseDTO
 import com.example.accmarket.core.models.DTO.AdvertisementDTO
 import com.example.accmarket.core.models.DTO.DeleteAdvertisementDTO
 import com.example.accmarket.core.service.AdvertisementService
-import com.example.accmarket.utils.models.Response
+import com.example.accmarket.utils.models.response.Response
 import org.springframework.data.domain.Page
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping

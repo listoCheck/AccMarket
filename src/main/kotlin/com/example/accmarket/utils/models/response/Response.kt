@@ -1,4 +1,4 @@
-package com.example.accmarket.utils.models
+package com.example.accmarket.utils.models.response
 
 data class Response(
     val code: Int = 200,
