@@ -4,6 +4,6 @@ import java.util.UUID
 
 data class DeleteAdvertisementDTO(
     val username: String,
-    val token: UUID,
+    val token: String,
     val advertisementId : UUID,
 )

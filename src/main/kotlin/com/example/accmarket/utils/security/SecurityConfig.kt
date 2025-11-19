@@ -28,6 +28,7 @@ class SecurityConfig {
                         "/core",
                     ).permitAll()
                     .requestMatchers("/admin/**").authenticated()
+                    .requestMatchers("/core/**").authenticated()
                     .anyRequest().authenticated()
             }
 

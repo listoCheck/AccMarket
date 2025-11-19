@@ -30,7 +30,7 @@ class AdvertisementService(
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
 
-        if (!jwtProvider.verifyToken(request.token.toString()))
+        if (!jwtProvider.verifyToken(request.token))
             return Response(code = 400, message = "Token not found or invalid")
 
         val adv = Advertisement(

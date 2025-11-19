@@ -1,5 +1,6 @@
 package com.example.accmarket.rolemanagement.models
 
+import com.example.accmarket.auth.models.User
 import jakarta.persistence.*
 import java.util.*
 

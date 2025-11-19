@@ -127,7 +127,7 @@ class RoleManagementService(
         if (adminSecretRepository.count() == 0L) {
             val defaultSecret = AdminSecret(
                 secretKey = System.getProperty("ADMIN_SECRET_DEFAULT"),
-                description = "Default admin secret key"
+                description = "Default admin secret key",
             )
             adminSecretRepository.save(defaultSecret)
         }

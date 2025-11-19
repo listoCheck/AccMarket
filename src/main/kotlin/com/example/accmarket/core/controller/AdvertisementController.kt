@@ -42,4 +42,9 @@ class AdvertisementController(
     ): Page<AdvertisementResponseDTO> {
         return advertisementService.getAdvertisements(userId, page, size, sortBy)
     }
+
+    //@GetMapping
+    //fun getUserAdvertisements(@RequestParam(required = false) userId: String): Page<AdvertisementResponseDTO> {
+    //    return advertisementService.getAdvertisements(userId)
+    //}
 }

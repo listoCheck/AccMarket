@@ -1,5 +1,6 @@
 package com.example.accmarket.auth.models
 
+import com.example.accmarket.rolemanagement.models.AdminSecret
 import jakarta.persistence.*
 import java.util.*
 
@@ -22,5 +23,5 @@ data class User(
     var roles: Set<String> = setOf("USER"),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var token: Token? = null
+    var token: Token? = null,
 )

@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class AdvertisementDTO(
     val username: String,
-    val token: UUID,
+    val token: String,
     val title: String,
     val text: String,
     val cost: Int,
