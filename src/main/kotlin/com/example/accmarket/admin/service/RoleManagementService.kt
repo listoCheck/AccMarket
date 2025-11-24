@@ -9,8 +9,11 @@ import com.example.accmarket.rolemanagement.models.AdminSecret
 import com.example.accmarket.rolemanagement.repository.AdminSecretRepository
 import com.example.accmarket.rolemanagement.models.DTO.RoleManagementDTO
 import com.example.accmarket.utils.JWT.JwtProvider
+import com.example.accmarket.utils.mail.EmailService
 import com.example.accmarket.utils.models.response.Response
 import com.example.accmarket.utils.models.response.ResponseHandler
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -19,8 +22,11 @@ class RoleManagementService(
     private val userRepository: UserRepository,
     private val tokenService: TokenService,
     private val adminSecretRepository: AdminSecretRepository,
-    private val jwtProvider: JwtProvider
+    private val jwtProvider: JwtProvider,
+    private val emailService: EmailService,
 ) {
+    @Value("\${ADMIN_SECRET_DEFAULT}")
+    private lateinit var secret: String
 
     fun assignAdminRole(request: AssignAdminRoleDTO): Response {
 
@@ -31,7 +37,7 @@ class RoleManagementService(
         val user = userRepository.findByUsername(request.username)
             ?: return ResponseHandler.userNotFound()
 
-        if (!adminSecretRepository.isValidSecret(request.adminSecret)) {
+        if (request.adminSecret != secret) {
             return ResponseHandler.invalidAdminSecret()
         }
 
@@ -40,6 +46,16 @@ class RoleManagementService(
         }
         user.roles = updatedRoles
         userRepository.save(user)
+
+        emailService.sendEmail(
+            to = userRepository.findByUsername(request.username)!!.email,
+            subject = "Добро пожаловать в AccMarket!",
+            text = """
+                Привет, ${request.username}!
+                
+                Теперь вы стали админом проекта, вы можете модерировать объявления и блокировать пользователей.
+            """.trimIndent()
+        )
 
         return Response(code = 200, message = "Admin role assigned successfully")
     }
@@ -123,13 +139,14 @@ class RoleManagementService(
         return user.roles.any { it == "ADMIN" || it == "MODERATOR" }
     }
 
-    fun initializeAdminSecret() {
-        if (adminSecretRepository.count() == 0L) {
-            val defaultSecret = AdminSecret(
-                secretKey = System.getProperty("ADMIN_SECRET_DEFAULT"),
-                description = "Default admin secret key",
-            )
-            adminSecretRepository.save(defaultSecret)
-        }
-    }
+    //fun initializeAdminSecret() {
+    //    if (adminSecretRepository.count() == 0L) {
+    //        val defaultSecret = AdminSecret(
+    //            secretKey = System.getProperty("ADMIN_SECRET_DEFAULT"),
+    //            description = "Default admin secret key",
+    //        )
+    //        adminSecretRepository.save(defaultSecret)
+    //    }
+    //}
+
 }

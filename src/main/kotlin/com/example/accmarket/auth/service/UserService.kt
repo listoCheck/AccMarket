@@ -46,7 +46,7 @@ class UserService(
 
         userRepository.save(user)
 
-        println(email)
+        //println(email)
 
         emailService.sendEmail(
             to = email,

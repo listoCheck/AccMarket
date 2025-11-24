@@ -18,5 +18,5 @@ data class AdminSecret(
     var isActive: Boolean = true,
 
     @Column
-    var description: String? = null
+    var description: String? = null,
 )

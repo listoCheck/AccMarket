@@ -22,14 +22,14 @@ class EmailService(
         message.subject = subject
         message.text = text
 
-        println("Отправка письма на $to с темой '$subject'")
-        try {
-            mailSender.send(message)
-            println("Письмо успешно отправлено")
-        } catch (e: Exception) {
-            println("Ошибка при отправке письма: ${e.message}")
-            e.printStackTrace()
-        }
+        //println("Отправка письма на $to с темой '$subject'")
+        //try {
+        //    mailSender.send(message)
+        //    println("Письмо успешно отправлено")
+        //} catch (e: Exception) {
+        //    println("Ошибка при отправке письма: ${e.message}")
+        //    e.printStackTrace()
+        //}
     }
 
 }

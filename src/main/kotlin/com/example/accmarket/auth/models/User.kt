@@ -26,6 +26,6 @@ data class User(
     var roles: Set<String> = setOf("USER"),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var token: Token? = null
+    var token: Token? = null,
 )
 

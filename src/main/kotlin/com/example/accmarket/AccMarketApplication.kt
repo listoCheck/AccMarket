@@ -12,10 +12,10 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy
 @EnableAspectJAutoProxy
 class AccMarketApplication {
 
-    @Bean
-    fun init(roleManagementService: RoleManagementService) = CommandLineRunner {
-        roleManagementService.initializeAdminSecret()
-    }
+    //@Bean
+    //fun init(roleManagementService: RoleManagementService) = CommandLineRunner {
+    //    roleManagementService.initializeAdminSecret()
+    //}
 }
 
 fun main(args: Array<String>) {
