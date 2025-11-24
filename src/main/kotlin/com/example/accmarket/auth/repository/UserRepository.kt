@@ -13,6 +13,8 @@ interface UserRepository : JpaRepository<User, UUID> {
 
     fun existsByUsername(username: String): Boolean
 
+    fun existsByEmail(email: String): Boolean
+
     @Transactional
     @Modifying
     @Query("UPDATE User u SET u.token = :token WHERE u.id = :id")

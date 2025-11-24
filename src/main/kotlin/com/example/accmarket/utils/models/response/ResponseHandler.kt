@@ -37,4 +37,7 @@ object ResponseHandler {
     fun targetUserNotFound(): Response {
         return Response(code = 404, message = "Target user not found")
     }
+    fun emailAlreadyExists(): Response {
+        return Response(code = 409, message = "Email already exists")
+    }
 }

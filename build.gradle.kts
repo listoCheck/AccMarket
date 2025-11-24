@@ -39,6 +39,8 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("com.graphql-java:java-dataloader:3.3.0")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+
 
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.mockito")

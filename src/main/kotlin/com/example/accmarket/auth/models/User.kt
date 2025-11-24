@@ -14,6 +14,9 @@ data class User(
     @Column(unique = true, nullable = false)
     var username: String,
 
+    @Column(unique = true, nullable = false)
+    var email: String,
+
     @Column(nullable = false)
     var password: String,
 
@@ -23,5 +26,6 @@ data class User(
     var roles: Set<String> = setOf("USER"),
 
     @OneToOne(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var token: Token? = null,
+    var token: Token? = null
 )
+

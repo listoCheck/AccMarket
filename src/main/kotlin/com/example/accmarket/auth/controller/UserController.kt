@@ -15,7 +15,8 @@ class UserController(
 ) {
     @PostMapping("/register")
     fun register(@RequestBody user: UserDto): Response {
-        return userService.register(user.username, user.password ?: "")
+        return userService.register(user.username, user.email ?: "", user.password ?: ""
+        )
     }
 
     @PostMapping("/login")
