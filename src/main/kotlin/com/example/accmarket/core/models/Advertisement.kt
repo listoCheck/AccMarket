@@ -28,7 +28,7 @@ data class Advertisement(
     var type: Type? = null,
 
     @Column
-    var checked: Boolean,
+    var rejected: Boolean?,
 
     @Column
     var createdAt: Date,

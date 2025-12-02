@@ -40,7 +40,7 @@ class AdvertisementController(
         @RequestParam(defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "createdAt") sortBy: String
     ): Page<AdvertisementResponseDTO> {
-        return advertisementService.getAdvertisements(userId, page, size, sortBy)
+        return advertisementService.getAdvertisements(userId, page, size, sortBy, rejected=false)
     }
 
     //@GetMapping

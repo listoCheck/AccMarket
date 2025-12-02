@@ -2,10 +2,10 @@
 package com.example.accmarket.rolemanagement.service
 
 import com.example.accmarket.admin.models.DTO.AssignAdminRoleDTO
+import com.example.accmarket.admin.models.DTO.AssignModeratorRoleDTO
 import com.example.accmarket.auth.models.User
 import com.example.accmarket.auth.repository.UserRepository
 import com.example.accmarket.auth.service.TokenService
-import com.example.accmarket.rolemanagement.models.AdminSecret
 import com.example.accmarket.rolemanagement.repository.AdminSecretRepository
 import com.example.accmarket.rolemanagement.models.DTO.RoleManagementDTO
 import com.example.accmarket.utils.JWT.JwtProvider
@@ -13,12 +13,11 @@ import com.example.accmarket.utils.mail.EmailService
 import com.example.accmarket.utils.models.response.Response
 import com.example.accmarket.utils.models.response.ResponseHandler
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.UUID
 
 @Service
-class RoleManagementService(
+class AdminService(
     private val userRepository: UserRepository,
     private val tokenService: TokenService,
     private val adminSecretRepository: AdminSecretRepository,
@@ -49,7 +48,7 @@ class RoleManagementService(
 
         emailService.sendEmail(
             to = userRepository.findByUsername(request.username)!!.email,
-            subject = "Добро пожаловать в AccMarket!",
+            subject = "AccMarket",
             text = """
                 Привет, ${request.username}!
                 
@@ -139,14 +138,15 @@ class RoleManagementService(
         return user.roles.any { it == "ADMIN" || it == "MODERATOR" }
     }
 
-    //fun initializeAdminSecret() {
-    //    if (adminSecretRepository.count() == 0L) {
-    //        val defaultSecret = AdminSecret(
-    //            secretKey = System.getProperty("ADMIN_SECRET_DEFAULT"),
-    //            description = "Default admin secret key",
-    //        )
-    //        adminSecretRepository.save(defaultSecret)
-    //    }
-    //}
+    fun assignModeratorRole(request: AssignModeratorRoleDTO): Response {
+        if (!jwtProvider.verifyToken(request.adminToken)) return ResponseHandler.invalidToken()
+        val adminUser = userRepository.findById(request.adminId).orElse(null) ?: return ResponseHandler.userNotFound()
+        if (!hasRoleManagementAccess(adminUser)) return ResponseHandler.invalidToken()
+        val targetUser = userRepository.findById(UUID.fromString(request.moderatorId.toString()))
+            .orElse(null) ?: return ResponseHandler.targetUserNotFound()
+        targetUser.roles = targetUser.roles.toMutableSet().apply { add("MODERATOR") }
+        userRepository.save(targetUser)
+        return Response(code = 200, message = "Moderator role assigned successfully")
+    }
 
 }

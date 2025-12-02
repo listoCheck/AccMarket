@@ -1,11 +1,8 @@
 package com.example.accmarket
 
-import com.example.accmarket.rolemanagement.service.RoleManagementService
 import io.github.cdimascio.dotenv.dotenv
-import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.EnableAspectJAutoProxy
 
 @SpringBootApplication

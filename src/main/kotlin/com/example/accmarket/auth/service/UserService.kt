@@ -74,7 +74,7 @@ class UserService(
             tokenRepository.updateUserToken(user.id, refreshToken)
             ResponseHandler.success(body = mapOf("accessToken" to accessToken, "refreshToken" to refreshToken))
         } else {
-            ResponseHandler.userNotFound()
+            ResponseHandler.incorrectLoginOrPassword()
         }
     }
 

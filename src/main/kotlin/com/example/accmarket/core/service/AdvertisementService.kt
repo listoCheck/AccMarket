@@ -9,6 +9,7 @@ import com.example.accmarket.core.models.DTO.DeleteAdvertisementDTO
 import com.example.accmarket.core.models.Type
 import com.example.accmarket.core.repository.AdvertisementRepository
 import com.example.accmarket.utils.JWT.JwtProvider
+import com.example.accmarket.utils.banwords.Banword
 import com.example.accmarket.utils.models.response.Response
 import org.hibernate.query.Page.page
 import org.springframework.data.domain.Page
@@ -25,6 +26,7 @@ class AdvertisementService(
     private val userRepository: UserRepository,
     private val tokenService: TokenService,
     private val jwtProvider: JwtProvider,
+    private val banwordService: Banword
 ) {
     fun makeAdvertisement(request: AdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
@@ -33,19 +35,36 @@ class AdvertisementService(
         if (!jwtProvider.verifyToken(request.token))
             return Response(code = 400, message = "Token not found or invalid")
 
+        val bannedWords = banwordService.find(request.title + " " + request.text)
+
         val adv = Advertisement(
             userId = user.id,
             title = request.title,
             text = request.text,
             cost = request.cost,
-            checked = false,
+            rejected = bannedWords.isNotEmpty(),
             createdAt = Date(System.currentTimeMillis())
         )
 
         adv.type = Type(advertisement = adv, platform = request.platform, genre = request.genre)
 
         advertisementRepository.save(adv)
-        return Response(code = 200, body = mapOf("token" to adv.id), message = "Advertisement is saved successfully")
+
+        return if (bannedWords.isNotEmpty()) {
+            Response(
+                code = 400,
+                body = mapOf("token" to adv.id),
+                message = "Advertisement contains banned words: ${
+                    bannedWords.distinct().joinToString(", ")
+                }. Saved for admin review."
+            )
+        } else {
+            Response(
+                code = 200,
+                body = mapOf("token" to adv.id),
+                message = "Advertisement is saved successfully"
+            )
+        }
     }
 
 
@@ -62,6 +81,9 @@ class AdvertisementService(
         if (adv.userId != user.id)
             return Response(code = 403, message = "You can't edit this advertisement")
 
+        val bannedWords = banwordService.find(request.title + " " + request.text)
+        adv.rejected = bannedWords.isNotEmpty()
+
         adv.title = request.title
         adv.text = request.text
         adv.cost = request.cost
@@ -70,8 +92,25 @@ class AdvertisementService(
         adv.type?.genre = request.genre
 
         advertisementRepository.save(adv)
-        return Response(code = 200, body = mapOf("token" to adv.id), message = "Advertisement updated successfully")
+
+        return if (bannedWords.isNotEmpty()) {
+            Response(
+                code = 400,
+                body = mapOf("token" to adv.id),
+                message = "Advertisement contains banned words: ${
+                    bannedWords.distinct().joinToString(", ")
+                }. Saved for admin review."
+            )
+        } else {
+            Response(
+                code = 200,
+                body = mapOf("token" to adv.id),
+                message = "Advertisement updated successfully"
+            )
+        }
     }
+
+
     fun deleteAdvertisement(request: DeleteAdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
@@ -93,16 +132,17 @@ class AdvertisementService(
         userId: String? = null,
         page: Int = 0,
         size: Int = 10,
-        sortBy: String = "createdAt"
+        sortBy: String = "createdAt",
+        rejected: Boolean
     ): Page<AdvertisementResponseDTO> {
 
         val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
 
         val adsPage = if (userId != null) {
             val uuid = UUID.fromString(userId)
-            advertisementRepository.findAllByUserId(uuid, pageable)
+            advertisementRepository.findAllByUserId(uuid, rejected, pageable)
         } else {
-            advertisementRepository.findAll(pageable)
+            advertisementRepository.findAllByRejected(rejected, pageable)
         }
 
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
