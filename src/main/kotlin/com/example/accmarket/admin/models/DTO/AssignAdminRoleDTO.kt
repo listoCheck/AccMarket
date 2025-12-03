@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class AssignAdminRoleDTO(
     val username: String,
-    val token: UUID,
+    val token: String,
     val adminSecret: String,
     val email: String
 )

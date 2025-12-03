@@ -37,6 +37,7 @@ class UserService(
         )
 
         val refreshToken = jwtProvider.createRefreshToken(username, listOf("USER"))
+        val accessToken = jwtProvider.createAccessToken(username, listOf("USER"))
 
         user.token = Token(
             user = user,
@@ -45,8 +46,6 @@ class UserService(
         )
 
         userRepository.save(user)
-
-        //println(email)
 
         emailService.sendEmail(
             to = email,
@@ -58,11 +57,15 @@ class UserService(
             """.trimIndent()
         )
 
+        // Возвращаем все три значения на фронт
         return ResponseHandler.success(
-            body = mapOf("refreshToken" to refreshToken)
+            body = mapOf(
+                "userId" to user.id,
+                "accessToken" to accessToken,
+                "refreshToken" to refreshToken
+            )
         )
     }
-
 
     fun login(username: String, password: String): Response {
         val user = userRepository.findByUsername(username)
@@ -72,7 +75,14 @@ class UserService(
             val refreshToken = jwtProvider.createRefreshToken(username, listOf("USER"))
             val accessToken = jwtProvider.createAccessToken(username, listOf("USER"))
             tokenRepository.updateUserToken(user.id, refreshToken)
-            ResponseHandler.success(body = mapOf("accessToken" to accessToken, "refreshToken" to refreshToken))
+
+            ResponseHandler.success(
+                body = mapOf(
+                    "userId" to user.id,
+                    "accessToken" to accessToken,
+                    "refreshToken" to refreshToken
+                )
+            )
         } else {
             ResponseHandler.incorrectLoginOrPassword()
         }

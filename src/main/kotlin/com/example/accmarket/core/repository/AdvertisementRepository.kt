@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository
 import java.util.UUID
 
 @Repository
-interface AdvertisementRepository  : JpaRepository<Advertisement, UUID> {
-    fun findAllByUserId(userId: UUID, rejected: Boolean, pageable: Pageable): Page<Advertisement>
+interface AdvertisementRepository : JpaRepository<Advertisement, UUID> {
+    fun findAllByUserIdAndRejected(userId: UUID, rejected: Boolean?, pageable: Pageable): Page<Advertisement>
     fun findAllByRejected(rejected: Boolean, pageable: Pageable): Page<Advertisement>
 }

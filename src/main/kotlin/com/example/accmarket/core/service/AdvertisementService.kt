@@ -11,6 +11,7 @@ import com.example.accmarket.core.repository.AdvertisementRepository
 import com.example.accmarket.utils.JWT.JwtProvider
 import com.example.accmarket.utils.banwords.Banword
 import com.example.accmarket.utils.models.response.Response
+import com.nimbusds.jwt.SignedJWT
 import org.hibernate.query.Page.page
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -140,10 +141,25 @@ class AdvertisementService(
 
         val adsPage = if (userId != null) {
             val uuid = UUID.fromString(userId)
-            advertisementRepository.findAllByUserId(uuid, rejected, pageable)
+            advertisementRepository.findAllByUserIdAndRejected(uuid, rejected, pageable)
         } else {
             advertisementRepository.findAllByRejected(rejected, pageable)
         }
+
+
+        return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
+    }
+
+    fun getUserAdvertisements(
+        userId: String,
+        page: Int = 0,
+        size: Int = 10,
+        sortBy: String = "createdAt",
+    ): Page<AdvertisementResponseDTO> {
+        val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
+        val user = userRepository.findByUsername(userId)
+        ?: throw IllegalArgumentException("User not found")
+        val adsPage = advertisementRepository.findAllByUserIdAndRejected(user.id, null, pageable)
 
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
     }
