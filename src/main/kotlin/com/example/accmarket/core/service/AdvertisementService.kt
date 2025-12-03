@@ -11,13 +11,10 @@ import com.example.accmarket.core.repository.AdvertisementRepository
 import com.example.accmarket.utils.JWT.JwtProvider
 import com.example.accmarket.utils.banwords.Banword
 import com.example.accmarket.utils.models.response.Response
-import com.nimbusds.jwt.SignedJWT
-import org.hibernate.query.Page.page
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
-import java.awt.print.Pageable
 import java.util.Date
 import java.util.UUID
 
@@ -73,7 +70,7 @@ class AdvertisementService(
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
 
-        if (!jwtProvider.verifyToken(request.token.toString()))
+        if (!jwtProvider.verifyToken(request.token))
             return Response(code = 401, message = "Token not found or invalid")
 
         val adv = advertisementRepository.findById(request.advertisementId!!)
@@ -116,7 +113,7 @@ class AdvertisementService(
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
 
-        if (!jwtProvider.verifyToken(request.token.toString()))
+        if (!jwtProvider.verifyToken(request.token))
             return Response(code = 400, message = "Token not found or invalid")
 
         val adv = advertisementRepository.findById(request.advertisementId)
