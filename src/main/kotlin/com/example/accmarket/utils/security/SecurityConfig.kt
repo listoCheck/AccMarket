@@ -22,16 +22,24 @@ class SecurityConfig {
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/auth/register", "/auth/login", "/auth/logout").permitAll()
+
+                    .requestMatchers("/admin/**").permitAll()
+
                     .requestMatchers(
                         "/core/make-advertisement",
                         "/core/edit-advertisement",
                         "/core",
+                        "/core/**"
                     ).permitAll()
-                    .requestMatchers("/admin/**").permitAll()
-                    .requestMatchers("/core/**").authenticated()
+
+                    .requestMatchers(
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html"
+                    ).permitAll()
+
                     .anyRequest().authenticated()
             }
-
         return http.build()
     }
 }
