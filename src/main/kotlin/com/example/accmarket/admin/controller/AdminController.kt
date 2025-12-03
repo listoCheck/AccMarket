@@ -57,7 +57,7 @@ class AdminController(
         return roleManagementService.getUserRoles(request)
     }
 
-    @PutMapping("/update")
+    @PatchMapping("/update")
     @Operation(
         summary = "Обновить роли пользователя",
         description = "Обновляет роли указанного пользователя",
