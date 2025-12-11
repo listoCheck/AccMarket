@@ -7,8 +7,15 @@ export const useAuthStore = defineStore('auth', {
     accessToken: localStorage.getItem('accessToken') || null,
     refreshToken: localStorage.getItem('refreshToken') || null,
     username: localStorage.getItem('username') || null,
+    roles: JSON.parse(localStorage.getItem('roles') || '[]'),
     isAuthenticated: !!localStorage.getItem('accessToken')
   }),
+
+  getters: {
+    isAdmin: (state) => state.roles.includes('ROLE_ADMIN'),
+    isModerator: (state) => state.roles.includes('ROLE_MODERATOR'),
+    hasAdminAccess: (state) => state.roles.includes('ROLE_ADMIN') || state.roles.includes('ROLE_MODERATOR')
+  },
 
   actions: {
     async register(username, email, password) {
@@ -35,17 +42,22 @@ export const useAuthStore = defineStore('auth', {
           this.username = username
           this.isAuthenticated = true
           
+          // Получаем роли пользователя
+          const roles = response.data.body.roles || []
+          this.roles = roles
+          
           localStorage.setItem('accessToken', this.accessToken)
           localStorage.setItem('refreshToken', this.refreshToken)
           localStorage.setItem('username', username)
+          localStorage.setItem('roles', JSON.stringify(roles))
           
           return { success: true, message: response.data.message }
         }
         return { success: false, message: response.data.message }
       } catch (error) {
-        return { 
-          success: false, 
-          message: error.response?.data?.message || 'Ошибка авторизации' 
+        return {
+          success: false,
+          message: error.response?.data?.message || 'Ошибка авторизации'
         }
       }
     },
@@ -67,11 +79,13 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null
       this.refreshToken = null
       this.username = null
+      this.roles = []
       this.isAuthenticated = false
       
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
       localStorage.removeItem('username')
+      localStorage.removeItem('roles')
     }
   }
 })

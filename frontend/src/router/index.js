@@ -27,7 +27,7 @@ const routes = [
     path: '/admin',
     name: 'Admin',
     component: AdminPanel,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]
 
@@ -41,6 +41,8 @@ router.beforeEach((to, from, next) => {
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')
+  } else if (to.meta.requiresAdmin && !authStore.hasAdminAccess) {
+    next('/')
   } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
     next('/')
   } else {

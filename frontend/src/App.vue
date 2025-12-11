@@ -8,7 +8,7 @@
         
         <nav class="nav-menu">
           <router-link to="/" class="nav-link">Объявления</router-link>
-          <router-link v-if="isAuthenticated" to="/admin" class="nav-link">Админ</router-link>
+          <router-link v-if="hasAdminAccess" to="/admin" class="nav-link">Админ</router-link>
           
           <div v-if="isAuthenticated" class="user-menu">
             <span class="username">{{ username }}</span>
@@ -50,6 +50,7 @@ export default {
 
     const isAuthenticated = computed(() => authStore.isAuthenticated)
     const username = computed(() => authStore.username)
+    const hasAdminAccess = computed(() => authStore.hasAdminAccess)
 
     const handleLogout = async () => {
       await authStore.logout()
@@ -59,6 +60,7 @@ export default {
     return {
       isAuthenticated,
       username,
+      hasAdminAccess,
       handleLogout
     }
   }
