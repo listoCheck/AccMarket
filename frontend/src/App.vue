@@ -28,7 +28,7 @@
 
     <footer class="app-footer">
       <div class="container">
-        <p>&copy; 2024 AccMarket - Маркетплейс игровых аккаунтов</p>
+        <p>&copy; 2025 AccMarket - Маркетплейс игровых аккаунтов</p>
         <p class="footer-note">
           ⚠️ Функции пополнения баланса и покупки аккаунтов находятся в разработке
         </p>

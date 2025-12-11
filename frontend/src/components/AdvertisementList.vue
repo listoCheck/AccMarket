@@ -239,10 +239,23 @@ export default {
 
 .search-input {
   flex: 1;
-  padding: 10px;
+  min-width: 200px;
+  padding: 10px 15px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  background: white;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.search-input::placeholder {
+  color: #999;
 }
 
 .sort-select {
