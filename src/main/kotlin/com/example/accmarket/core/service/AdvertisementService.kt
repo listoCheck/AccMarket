@@ -8,6 +8,8 @@ import com.example.accmarket.core.models.DTO.AdvertisementDTO
 import com.example.accmarket.core.models.DTO.DeleteAdvertisementDTO
 import com.example.accmarket.core.models.Type
 import com.example.accmarket.core.repository.AdvertisementRepository
+import com.example.accmarket.notification.models.NotificationType
+import com.example.accmarket.notification.service.NotificationService
 import com.example.accmarket.utils.JWT.JwtProvider
 import com.example.accmarket.utils.banwords.Banword
 import com.example.accmarket.utils.models.response.Response
@@ -24,7 +26,8 @@ class AdvertisementService(
     private val userRepository: UserRepository,
     private val tokenService: TokenService,
     private val jwtProvider: JwtProvider,
-    private val banwordService: Banword
+    private val banwordService: Banword,
+    private val notificationService: NotificationService
 ) {
     fun makeAdvertisement(request: AdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
@@ -47,6 +50,19 @@ class AdvertisementService(
         adv.type = Type(advertisement = adv, platform = request.platform, genre = request.genre)
 
         advertisementRepository.save(adv)
+        notificationService.send(
+            user.id,
+            if (bannedWords.isNotEmpty())
+                NotificationType.MODERATION_REJECTED
+            else
+                NotificationType.SYSTEM,
+            "Advertisement created",
+            if (bannedWords.isNotEmpty())
+                "Your advertisement contains banned words and was sent for moderation."
+            else
+                "Your advertisement was successfully published."
+        )
+
 
         return if (bannedWords.isNotEmpty()) {
             Response(
@@ -123,6 +139,13 @@ class AdvertisementService(
             return Response(code = 403, message = "You can't edit this advertisement")
         adv.ended = true
         advertisementRepository.save(adv)
+        notificationService.send(
+            user.id,
+            NotificationType.SYSTEM,
+            "Advertisement ended",
+            "Your advertisement \"${adv.title}\" has been marked as ended."
+        )
+
         return Response(code = 200, message = "Advertisement updated successfully")
     }
 
@@ -138,12 +161,19 @@ class AdvertisementService(
 
         val adsPage = if (userId != null) {
             val uuid = UUID.fromString(userId)
-            advertisementRepository.findAllByUserIdAndRejected(uuid, rejected, pageable)
+            advertisementRepository.findAllByUserIdAndRejectedAndEnded(
+                uuid,
+                rejected,
+                false,
+                pageable
+            )
         } else {
-            advertisementRepository.findAllByRejected(rejected, pageable)
+            advertisementRepository.findAllByRejectedAndEnded(
+                rejected,
+                false,
+                pageable
+            )
         }
-
-
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
     }
 
@@ -156,8 +186,12 @@ class AdvertisementService(
         val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
         val user = userRepository.findByUsername(userId)
         ?: throw IllegalArgumentException("User not found")
-        val adsPage = advertisementRepository.findAllByUserIdAndRejected(user.id, null, pageable)
-
+        val adsPage = advertisementRepository.findAllByUserIdAndRejectedAndEnded(
+            user.id,
+            null,
+            false,
+            pageable
+        )
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
     }
 

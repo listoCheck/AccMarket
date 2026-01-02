@@ -9,6 +9,17 @@ import java.util.UUID
 
 @Repository
 interface AdvertisementRepository : JpaRepository<Advertisement, UUID> {
-    fun findAllByUserIdAndRejected(userId: UUID, rejected: Boolean?, pageable: Pageable): Page<Advertisement>
-    fun findAllByRejected(rejected: Boolean, pageable: Pageable): Page<Advertisement>
+
+    fun findAllByUserIdAndRejectedAndEnded(
+        userId: UUID,
+        rejected: Boolean?,
+        ended: Boolean,
+        pageable: Pageable
+    ): Page<Advertisement>
+
+    fun findAllByRejectedAndEnded(
+        rejected: Boolean,
+        ended: Boolean,
+        pageable: Pageable
+    ): Page<Advertisement>
 }
