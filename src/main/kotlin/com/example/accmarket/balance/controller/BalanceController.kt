@@ -24,8 +24,8 @@ class BalanceController(
     )
     @ApiResponse(responseCode = "200", description = "Balance retrieved successfully")
     @GetMapping("/{userId}")
-    fun get(@PathVariable userId: String) =
-        balanceService.get(UUID.fromString(userId))
+    fun get(@PathVariable userId: UUID) =
+        balanceService.get(userId)
 
     @Operation(
         summary = "Deposit funds",

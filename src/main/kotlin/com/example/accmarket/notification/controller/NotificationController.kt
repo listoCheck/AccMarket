@@ -23,8 +23,8 @@ class NotificationController(
     )
     @ApiResponse(responseCode = "200", description = "Notifications retrieved")
     @GetMapping("/{userId}")
-    fun getAll(@PathVariable userId: String) =
-        notificationService.getUserNotifications(UUID.fromString(userId))
+    fun getAll(@PathVariable userId: UUID) =
+        notificationService.getUserNotifications(userId)
 
     @Operation(
         summary = "Get unread notifications",
@@ -32,8 +32,8 @@ class NotificationController(
     )
     @ApiResponse(responseCode = "200", description = "Unread notifications retrieved")
     @GetMapping("/{userId}/unread")
-    fun unread(@PathVariable userId: String) =
-        notificationService.getUnread(UUID.fromString(userId))
+    fun unread(@PathVariable userId: UUID) =
+        notificationService.getUnread(userId)
 
     @Operation(
         summary = "Mark notification as read",
@@ -41,8 +41,8 @@ class NotificationController(
     )
     @ApiResponse(responseCode = "200", description = "Notification marked as read")
     @PostMapping("/read/{notificationId}")
-    fun markRead(@PathVariable notificationId: String) =
-        notificationService.markAsRead(UUID.fromString(notificationId))
+    fun markRead(@PathVariable notificationId: UUID) =
+        notificationService.markAsRead(notificationId)
 
     @Operation(
         summary = "Mark all notifications as read",
@@ -50,6 +50,6 @@ class NotificationController(
     )
     @ApiResponse(responseCode = "200", description = "All notifications marked as read")
     @PostMapping("/read-all/{userId}")
-    fun markAll(@PathVariable userId: String) =
-        notificationService.markAllAsRead(UUID.fromString(userId))
+    fun markAll(@PathVariable userId: UUID) =
+        notificationService.markAllAsRead(userId)
 }
