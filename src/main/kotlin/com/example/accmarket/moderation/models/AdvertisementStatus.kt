@@ -1,7 +1,8 @@
 package com.example.accmarket.moderation.models
 
-enum class AppealStatus {
+enum class AdvertisementStatus {
     PENDING,
     APPROVED,
-    REJECTED
+    REJECTED,
+    UNDER_APPEAL
 }

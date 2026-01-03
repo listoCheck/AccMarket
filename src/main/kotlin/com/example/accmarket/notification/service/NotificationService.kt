@@ -34,12 +34,16 @@ class NotificationService(
             )
         )
 
-        user.email.let {
-            mailService.sendEmail(
-                to = it,
-                subject = title,
-                text = message
-            )
+        try {
+            val email = user.email
+            if (!email.isNullOrBlank()) {
+                mailService.sendEmail(
+                    to = email,
+                    subject = title,
+                    text = message
+                )
+            }
+        } catch (ex: Exception) {
         }
 
         return notification
@@ -49,19 +53,24 @@ class NotificationService(
         notificationRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
 
     fun getUnread(userId: UUID): List<Notification> =
-        notificationRepository.findAllByUserIdAndIsReadFalse(userId)
+        notificationRepository.findAllByUserIdAndIsReadFalseOrderByCreatedAtDesc(userId)
 
-    fun markAsRead(notificationId: UUID): Notification {
+    fun markAsRead(notificationId: UUID, userId: UUID): Notification {
         val notification = notificationRepository.findById(notificationId)
             .orElseThrow { IllegalArgumentException("Notification not found") }
 
-        notification.isRead = true
-        return notificationRepository.save(notification)
+        if (notification.userId != userId)
+            throw IllegalStateException("Access denied")
+
+        if (!notification.isRead) {
+            notification.isRead = true
+            notificationRepository.save(notification)
+        }
+
+        return notification
     }
 
     fun markAllAsRead(userId: UUID) {
-        val unread = notificationRepository.findAllByUserIdAndIsReadFalse(userId)
-        unread.forEach { it.isRead = true }
-        notificationRepository.saveAll(unread)
+        notificationRepository.markAllAsReadByUserId(userId)
     }
 }

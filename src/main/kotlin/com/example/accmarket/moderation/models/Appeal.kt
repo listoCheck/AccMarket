@@ -18,7 +18,7 @@ data class Appeal(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    var status: AppealStatus = AppealStatus.PENDING,
+    var status: AdvertisementStatus = AdvertisementStatus.PENDING,
 
     @Column
     var decision: String? = null,

@@ -3,7 +3,7 @@ package com.example.accmarket.moderation.service
 
 import com.example.accmarket.core.repository.AdvertisementRepository
 import com.example.accmarket.moderation.models.Appeal
-import com.example.accmarket.moderation.models.AppealStatus
+import com.example.accmarket.moderation.models.AdvertisementStatus
 import com.example.accmarket.moderation.models.DTO.AppealCreateDTO
 import com.example.accmarket.moderation.models.DTO.AppealDecisionDTO
 import com.example.accmarket.moderation.repository.AppealRepository
@@ -44,7 +44,7 @@ class AppealService(
         val appeal = appealRepository.findById(dto.appealId)
             .orElseThrow { IllegalArgumentException("Appeal not found") }
 
-        if (appeal.status != AppealStatus.PENDING)
+        if (appeal.status != AdvertisementStatus.PENDING)
             throw IllegalStateException("Appeal already decided")
 
         appeal.status = dto.status
@@ -55,7 +55,7 @@ class AppealService(
 
         notificationService.send(
             userId = appeal.advertisement.userId,
-            type = if (dto.status == AppealStatus.APPROVED)
+            type = if (dto.status == AdvertisementStatus.APPROVED)
                 NotificationType.APPEAL_APPROVED
             else
                 NotificationType.APPEAL_REJECTED,
@@ -67,6 +67,6 @@ class AppealService(
     }
 
     fun getPending(): List<Appeal> =
-        appealRepository.findAllByStatus(AppealStatus.PENDING)
+        appealRepository.findAllByStatus(AdvertisementStatus.PENDING)
 
 }

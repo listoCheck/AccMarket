@@ -8,7 +8,7 @@ import java.util.UUID
 class TokenService(
     val tokenRepository: TokenRepository
 ) {
-    fun checkToken(token: UUID): Boolean {
+    fun checkToken(token: String): Boolean {
         val token = tokenRepository.findByRefreshToken(token.toString())?: return false
         val notExpired = tokenRepository.isTokenActive(token.toString())
         val isActive = token.isActive

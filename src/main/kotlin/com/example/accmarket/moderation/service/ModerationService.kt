@@ -29,7 +29,7 @@ class ModerationService(
         )
 
         if (dto.decision == ModerationDecision.APPROVED) {
-            ad.rejected = false
+            ad.rejected = dto.decision == ModerationDecision.REJECTED
         }
 
         advertisementRepository.save(ad)

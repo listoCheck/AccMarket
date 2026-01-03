@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 import java.util.UUID
 
@@ -29,6 +30,7 @@ class AdvertisementService(
     private val banwordService: Banword,
     private val notificationService: NotificationService
 ) {
+    @Transactional
     fun makeAdvertisement(request: AdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
@@ -123,8 +125,7 @@ class AdvertisementService(
             )
         }
     }
-
-
+    @Transactional
     fun deleteAdvertisement(request: DeleteAdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
@@ -177,14 +178,14 @@ class AdvertisementService(
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
     }
 
-    fun getUserAdvertisements(
-        userId: String,
+    fun getUserAdvertisementsByUserName(
+        userName: String,
         page: Int = 0,
         size: Int = 10,
         sortBy: String = "createdAt",
     ): Page<AdvertisementResponseDTO> {
         val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
-        val user = userRepository.findByUsername(userId)
+        val user = userRepository.findByUsername(userName)
         ?: throw IllegalArgumentException("User not found")
         val adsPage = advertisementRepository.findAllByUserIdAndRejectedAndEnded(
             user.id,
@@ -195,5 +196,19 @@ class AdvertisementService(
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
     }
 
-
+    fun getUserAdvertisementsByUserId(
+        userId: UUID,
+        page: Int = 0,
+        size: Int = 10,
+        sortBy: String = "createdAt",
+    ): Page<AdvertisementResponseDTO> {
+        val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
+        val adsPage = advertisementRepository.findAllByUserIdAndRejectedAndEnded(
+            userId,
+            null,
+            false,
+            pageable
+        )
+        return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
+    }
 }
