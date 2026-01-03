@@ -21,14 +21,17 @@ export const useAuthStore = defineStore('auth', {
     async register(username, email, password) {
       try {
         const response = await authAPI.register(username, email, password)
+        console.log('Register response:', response.data)
+        
         if (response.data.success) {
-          return { success: true, message: response.data.message }
+          return { success: true, message: response.data.message || 'Регистрация успешна!' }
         }
         return { success: false, message: response.data.message }
       } catch (error) {
-        return { 
-          success: false, 
-          message: error.response?.data?.message || 'Ошибка регистрации' 
+        console.error('Register error:', error)
+        return {
+          success: false,
+          message: error.response?.data?.message || 'Ошибка регистрации'
         }
       }
     },
@@ -36,27 +39,33 @@ export const useAuthStore = defineStore('auth', {
     async login(username, password) {
       try {
         const response = await authAPI.login(username, password)
+        console.log('Login response:', response.data)
+        
         if (response.data.success) {
           const data = response.data.data
           this.accessToken = data.accessToken
           this.refreshToken = data.refreshToken
           this.username = username
           this.userId = data.userId
-          this.roles = data.roles || []
+          
+          // Роли нужно получить отдельно или из токена
+          // Пока устанавливаем базовую роль USER
+          this.roles = ['USER']
 
           localStorage.setItem('accessToken', data.accessToken)
           localStorage.setItem('refreshToken', data.refreshToken)
           localStorage.setItem('username', username)
           localStorage.setItem('userId', data.userId)
-          localStorage.setItem('roles', JSON.stringify(data.roles || []))
+          localStorage.setItem('roles', JSON.stringify(['USER']))
 
           return { success: true }
         }
         return { success: false, message: response.data.message }
       } catch (error) {
-        return { 
-          success: false, 
-          message: error.response?.data?.message || 'Ошибка входа' 
+        console.error('Login error:', error)
+        return {
+          success: false,
+          message: error.response?.data?.message || 'Ошибка входа'
         }
       }
     },
