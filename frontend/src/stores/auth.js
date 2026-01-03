@@ -41,8 +41,9 @@ export const useAuthStore = defineStore('auth', {
         const response = await authAPI.login(username, password)
         console.log('Login response:', response.data)
         
-        if (response.data.success) {
-          const data = response.data.data
+        // Проверяем, что в ответе есть body с данными
+        if (response.data && response.data.body) {
+          const data = response.data.body
           this.accessToken = data.accessToken
           this.refreshToken = data.refreshToken
           this.username = username
@@ -58,9 +59,11 @@ export const useAuthStore = defineStore('auth', {
           localStorage.setItem('userId', data.userId)
           localStorage.setItem('roles', JSON.stringify(['USER']))
 
+          console.log('Login data saved successfully')
           return { success: true }
         }
-        return { success: false, message: response.data.message }
+        
+        return { success: false, message: response.data.message || 'Ошибка входа' }
       } catch (error) {
         console.error('Login error:', error)
         return {
