@@ -66,14 +66,20 @@ export default {
       error.value = ''
 
       try {
+        console.log('Attempting login with:', form.value.username)
         const result = await authStore.login(form.value.username, form.value.password)
+        console.log('Login result:', result)
         
         if (result.success) {
-          router.push('/')
+          console.log('Login successful, redirecting to /')
+          await router.push('/')
+          console.log('Redirect complete')
         } else {
+          console.log('Login failed:', result.message)
           error.value = result.message || 'Ошибка входа'
         }
       } catch (err) {
+        console.error('Login exception:', err)
         error.value = 'Произошла ошибка при входе'
       } finally {
         loading.value = false
