@@ -110,7 +110,7 @@ export default {
     const fetchBalance = async () => {
       try {
         const response = await balanceAPI.get(authStore.userId)
-        balance.value = response.data.balance || 0
+        balance.value = response.data.amount || 0
       } catch (err) {
         error.value = 'Ошибка загрузки баланса'
       }
