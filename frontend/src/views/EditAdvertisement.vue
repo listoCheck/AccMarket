@@ -23,10 +23,10 @@
       </div>
 
       <div class="form-group">
-        <label for="description">Описание</label>
+        <label for="text">Описание</label>
         <textarea
-          id="description"
-          v-model="form.description"
+          id="text"
+          v-model="form.text"
           required
           rows="6"
           placeholder="Подробное описание товара/услуги"
@@ -34,26 +34,37 @@
       </div>
 
       <div class="form-group">
-        <label for="price">Цена (₽)</label>
+        <label for="cost">Цена (₽)</label>
         <input
-          id="price"
-          v-model.number="form.price"
+          id="cost"
+          v-model.number="form.cost"
           type="number"
           required
           min="0"
-          step="0.01"
-          placeholder="0.00"
+          step="1"
+          placeholder="0"
         />
       </div>
 
       <div class="form-group">
-        <label for="type">Тип</label>
+        <label for="platform">Платформа</label>
         <input
-          id="type"
-          v-model="form.type"
+          id="platform"
+          v-model="form.platform"
           type="text"
           required
           placeholder="Например: Steam, Epic Games, Origin"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="genre">Жанр</label>
+        <input
+          id="genre"
+          v-model="form.genre"
+          type="text"
+          required
+          placeholder="Например: Action, RPG, Strategy"
         />
       </div>
 
@@ -90,9 +101,10 @@ export default {
     const form = ref({
       id: '',
       title: '',
-      description: '',
-      price: 0,
-      type: ''
+      text: '',
+      cost: 0,
+      platform: '',
+      genre: ''
     })
 
     const loading = ref(false)
@@ -105,9 +117,10 @@ export default {
         form.value = {
           id: currentAd.id,
           title: currentAd.title,
-          description: currentAd.description,
-          price: currentAd.price,
-          type: currentAd.type
+          text: currentAd.text,
+          cost: currentAd.cost,
+          platform: currentAd.platform,
+          genre: currentAd.genre
         }
       } else {
         error.value = 'Объявление не найдено'
@@ -128,9 +141,10 @@ export default {
           token: authStore.accessToken,
           advertisementId: form.value.id,
           title: form.value.title,
-          description: form.value.description,
-          price: form.value.price,
-          type: form.value.type
+          text: form.value.text,
+          cost: form.value.cost,
+          platform: form.value.platform,
+          genre: form.value.genre
         })
 
         if (result.success) {

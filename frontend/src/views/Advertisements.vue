@@ -33,10 +33,11 @@
         class="ad-card"
       >
         <h3>{{ ad.title }}</h3>
-        <p class="ad-description">{{ ad.description }}</p>
+        <p class="ad-description">{{ ad.text }}</p>
         <div class="ad-details">
-          <span class="ad-price">{{ ad.price }} ₽</span>
-          <span class="ad-type">{{ ad.type }}</span>
+          <span class="ad-price">{{ ad.cost }} ₽</span>
+          <span class="ad-platform">{{ ad.platform }}</span>
+          <span class="ad-genre">{{ ad.genre }}</span>
         </div>
         <div class="ad-meta">
           <span>Автор: {{ ad.authorUsername }}</span>
@@ -109,7 +110,9 @@ export default {
         const query = searchQuery.value.toLowerCase()
         filtered = filtered.filter(ad =>
           ad.title?.toLowerCase().includes(query) ||
-          ad.description?.toLowerCase().includes(query)
+          ad.text?.toLowerCase().includes(query) ||
+          ad.platform?.toLowerCase().includes(query) ||
+          ad.genre?.toLowerCase().includes(query)
         )
       }
 
@@ -268,12 +271,18 @@ export default {
   color: #27ae60;
 }
 
-.ad-type {
+.ad-platform,
+.ad-genre {
   background: #3498db;
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-size: 0.875rem;
+  margin-left: 0.5rem;
+}
+
+.ad-genre {
+  background: #9b59b6;
 }
 
 .ad-meta {
