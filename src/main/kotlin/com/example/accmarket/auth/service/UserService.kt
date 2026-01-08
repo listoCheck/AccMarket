@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service
 import com.example.accmarket.utils.JWT.JwtProvider
 import com.example.accmarket.utils.mail.EmailService
 import com.example.accmarket.utils.models.response.ResponseHandler
+import org.springframework.transaction.annotation.Transactional
 
 import java.util.Date
 
@@ -20,6 +21,8 @@ class UserService(
     private val tokenRepository: TokenRepository,
     private val emailService: EmailService
 ) {
+
+    @Transactional
     fun register(username: String, email: String, password: String): Response {
 
         if (userRepository.existsByUsername(username)) {
@@ -47,17 +50,18 @@ class UserService(
 
         userRepository.save(user)
 
-        emailService.sendEmail(
-            to = email,
-            subject = "Добро пожаловать в AccMarket!",
-            text = """
-                Привет, $username!
-                
-                Спасибо за регистрацию в AccMarket.
-            """.trimIndent()
-        )
+        sendAfterCommit {
+            emailService.sendEmail(
+                to = email,
+                subject = "Добро пожаловать в AccMarket!",
+                text = """
+                    Привет, $username!
+                    
+                    Спасибо за регистрацию в AccMarket.
+                """.trimIndent()
+            )
+        }
 
-        // Возвращаем все три значения на фронт
         return ResponseHandler.success(
             body = mapOf(
                 "userId" to user.id,
@@ -88,18 +92,17 @@ class UserService(
         }
     }
 
-
     fun logout(username: String, token: String): Response {
         val user = userRepository.findByUsername(username)
             ?: return ResponseHandler.userNotFound()
 
-        val tokenCheck = jwtProvider.verifyToken(token)
-        if (!tokenCheck) return ResponseHandler.invalidToken()
+        if (!jwtProvider.verifyToken(token)) return ResponseHandler.invalidToken()
+
         val tokenEntity = tokenRepository.findByUserId(user.id)
         if (tokenEntity.refreshToken != token) return ResponseHandler.invalidToken()
 
         tokenEntity.isActive = false
-        tokenEntity.refreshRequired = Date(System.currentTimeMillis() + 30 * 60 * 60 * 24 * 1000L)
+        tokenEntity.refreshRequired = Date(System.currentTimeMillis() + 30L * 24 * 60 * 60 * 1000) // 30 дней
         tokenRepository.save(tokenEntity)
 
         return ResponseHandler.success()
@@ -108,12 +111,27 @@ class UserService(
     fun updateAccessToken(username: String, token: String): Response {
         val user = userRepository.findByUsername(username)
             ?: return ResponseHandler.userNotFound()
-        val tokenCheck = jwtProvider.verifyToken(token)
-        if (!tokenCheck) return ResponseHandler.invalidToken()
+
+        if (!jwtProvider.verifyToken(token)) return ResponseHandler.invalidToken()
+
         val tokenEntity = tokenRepository.findByUserId(user.id)
         if (tokenEntity.refreshToken != token) return ResponseHandler.invalidToken()
+
         val newAccessToken = jwtProvider.createAccessToken(username, listOf("USER"))
         return ResponseHandler.success(body = mapOf("accessToken" to newAccessToken))
     }
 
+    private fun sendAfterCommit(action: () -> Unit) {
+        org.springframework.transaction.support.TransactionSynchronizationManager
+            .registerSynchronization(object :
+                org.springframework.transaction.support.TransactionSynchronization {
+
+                override fun afterCommit() {
+                    try {
+                        action()
+                    } catch (_: Exception) {
+                    }
+                }
+            })
+    }
 }

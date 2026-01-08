@@ -33,6 +33,6 @@ class ModerationController(
     )
     @ApiResponse(responseCode = "200", description = "Moderation result retrieved")
     @GetMapping("/{advertisementId}")
-    fun getByAdvertisement(@PathVariable advertisementId: String) =
-        moderationService.getByAdvertisement(UUID.fromString(advertisementId))
+    fun getByAdvertisement(@PathVariable advertisementId: UUID) =
+        moderationService.getByAdvertisement(advertisementId)
 }

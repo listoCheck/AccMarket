@@ -40,7 +40,7 @@ class AdminController(
         return roleManagementService.assignAdminRole(request)
     }
 
-    @GetMapping("/user")
+    @PostMapping("/user")
     @Operation(
         summary = "Получить роли пользователя",
         description = "Возвращает роли указанного пользователя",
@@ -75,7 +75,7 @@ class AdminController(
         return roleManagementService.updateUserRoles(request)
     }
 
-    @GetMapping("/all-users")
+    @PostMapping("/all-users")
     @Operation(
         summary = "Получить всех пользователей",
         description = "Возвращает список всех пользователей с их ролями",

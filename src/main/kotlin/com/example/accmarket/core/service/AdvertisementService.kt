@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 import java.util.UUID
 
@@ -29,6 +30,8 @@ class AdvertisementService(
     private val banwordService: Banword,
     private val notificationService: NotificationService
 ) {
+
+    @Transactional
     fun makeAdvertisement(request: AdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
@@ -36,7 +39,7 @@ class AdvertisementService(
         if (!jwtProvider.verifyToken(request.token))
             return Response(code = 400, message = "Token not found or invalid")
 
-        val bannedWords = banwordService.find(request.title + " " + request.text)
+        val bannedWords = banwordService.find("${request.title} ${request.text}")
 
         val adv = Advertisement(
             userId = user.id,
@@ -44,25 +47,31 @@ class AdvertisementService(
             text = request.text,
             cost = request.cost,
             rejected = bannedWords.isNotEmpty(),
-            createdAt = Date(System.currentTimeMillis())
+            createdAt = Date()
         )
 
-        adv.type = Type(advertisement = adv, platform = request.platform, genre = request.genre)
+        adv.type = Type(
+            advertisement = adv,
+            platform = request.platform,
+            genre = request.genre
+        )
 
         advertisementRepository.save(adv)
-        notificationService.send(
-            user.id,
-            if (bannedWords.isNotEmpty())
-                NotificationType.MODERATION_REJECTED
-            else
-                NotificationType.SYSTEM,
-            "Advertisement created",
-            if (bannedWords.isNotEmpty())
-                "Your advertisement contains banned words and was sent for moderation."
-            else
-                "Your advertisement was successfully published."
-        )
 
+        sendAfterCommit {
+            notificationService.send(
+                user.id,
+                if (bannedWords.isNotEmpty())
+                    NotificationType.MODERATION_REJECTED
+                else
+                    NotificationType.SYSTEM,
+                "Advertisement created",
+                if (bannedWords.isNotEmpty())
+                    "Your advertisement contains banned words and was sent for moderation."
+                else
+                    "Your advertisement was successfully published."
+            )
+        }
 
         return if (bannedWords.isNotEmpty()) {
             Response(
@@ -81,7 +90,6 @@ class AdvertisementService(
         }
     }
 
-
     fun editAdvertisement(request: AdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
@@ -95,15 +103,16 @@ class AdvertisementService(
         if (adv.userId != user.id)
             return Response(code = 403, message = "You can't edit this advertisement")
 
-        val bannedWords = banwordService.find(request.title + " " + request.text)
-        adv.rejected = bannedWords.isNotEmpty()
+        val bannedWords = banwordService.find("${request.title} ${request.text}")
 
-        adv.title = request.title
-        adv.text = request.text
-        adv.cost = request.cost
-
-        adv.type?.platform = request.platform
-        adv.type?.genre = request.genre
+        adv.apply {
+            rejected = bannedWords.isNotEmpty()
+            title = request.title
+            text = request.text
+            cost = request.cost
+            type?.platform = request.platform
+            type?.genre = request.genre
+        }
 
         advertisementRepository.save(adv)
 
@@ -124,7 +133,7 @@ class AdvertisementService(
         }
     }
 
-
+    @Transactional
     fun deleteAdvertisement(request: DeleteAdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
@@ -137,63 +146,34 @@ class AdvertisementService(
 
         if (adv.userId != user.id)
             return Response(code = 403, message = "You can't edit this advertisement")
+
         adv.ended = true
         advertisementRepository.save(adv)
-        notificationService.send(
-            user.id,
-            NotificationType.SYSTEM,
-            "Advertisement ended",
-            "Your advertisement \"${adv.title}\" has been marked as ended."
-        )
+
+        sendAfterCommit {
+            notificationService.send(
+                user.id,
+                NotificationType.SYSTEM,
+                "Advertisement ended",
+                "Your advertisement \"${adv.title}\" has been marked as ended."
+            )
+        }
 
         return Response(code = 200, message = "Advertisement updated successfully")
     }
 
-    fun getAdvertisements(
-        userId: String? = null,
-        page: Int = 0,
-        size: Int = 10,
-        sortBy: String = "createdAt",
-        rejected: Boolean
-    ): Page<AdvertisementResponseDTO> {
+    private fun sendAfterCommit(action: () -> Unit) {
+        org.springframework.transaction.support.TransactionSynchronizationManager
+            .registerSynchronization(object :
+                org.springframework.transaction.support.TransactionSynchronization {
 
-        val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
-
-        val adsPage = if (userId != null) {
-            val uuid = UUID.fromString(userId)
-            advertisementRepository.findAllByUserIdAndRejectedAndEnded(
-                uuid,
-                rejected,
-                false,
-                pageable
-            )
-        } else {
-            advertisementRepository.findAllByRejectedAndEnded(
-                rejected,
-                false,
-                pageable
-            )
-        }
-        return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
+                override fun afterCommit() {
+                    try {
+                        action()
+                    } catch (_: Exception) {
+                    }
+                }
+            })
     }
-
-    fun getUserAdvertisements(
-        userId: String,
-        page: Int = 0,
-        size: Int = 10,
-        sortBy: String = "createdAt",
-    ): Page<AdvertisementResponseDTO> {
-        val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
-        val user = userRepository.findByUsername(userId)
-        ?: throw IllegalArgumentException("User not found")
-        val adsPage = advertisementRepository.findAllByUserIdAndRejectedAndEnded(
-            user.id,
-            null,
-            false,
-            pageable
-        )
-        return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
-    }
-
 
 }

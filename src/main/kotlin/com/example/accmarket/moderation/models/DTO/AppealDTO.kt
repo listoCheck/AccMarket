@@ -1,6 +1,6 @@
 package com.example.accmarket.moderation.models.DTO
 
-import com.example.accmarket.moderation.models.AppealStatus
+import com.example.accmarket.moderation.models.AdvertisementStatus
 import java.util.*
 
 data class AppealCreateDTO(
@@ -9,6 +9,6 @@ data class AppealCreateDTO(
 
 data class AppealDecisionDTO(
     val appealId: UUID,
-    val status: AppealStatus,
+    val status: AdvertisementStatus,
     val decision: String?
 )

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBod
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import org.springframework.data.domain.Page
 import org.springframework.web.bind.annotation.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/core")
@@ -55,7 +56,7 @@ class AdvertisementController(
         return advertisementService.editAdvertisement(request)
     }
 
-    @DeleteMapping
+    @PostMapping
     @Operation(
         summary = "Удаление объявления",
         description = "Помечает объявление как завершенное",
@@ -100,7 +101,7 @@ class AdvertisementController(
             ApiResponse(responseCode = "404", description = "Пользователь не найден", content = [Content(schema = Schema(implementation = Response::class))])
         ]
     )
-    fun getUserAdvertisements(@PathVariable userId: String): Page<AdvertisementResponseDTO> {
-        return advertisementService.getUserAdvertisements(userId)
+    fun getUserAdvertisements(@PathVariable userId: UUID): Page<AdvertisementResponseDTO> {
+        return advertisementService.getUserAdvertisementsByUserId(userId)
     }
 }
