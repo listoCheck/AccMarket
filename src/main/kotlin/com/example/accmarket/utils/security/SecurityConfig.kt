@@ -33,6 +33,22 @@ class SecurityConfig {
                     ).permitAll()
 
                     .requestMatchers(
+                        "/notifications/**"
+                    ).permitAll()
+
+                    .requestMatchers(
+                        "/appeals/**"
+                    ).permitAll()
+
+                    .requestMatchers(
+                        "/admin/moderation/**"
+                    ).permitAll()
+
+                    .requestMatchers(
+                        "/balance/**"
+                    ).permitAll()
+
+                    .requestMatchers(
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/swagger-ui.html"
