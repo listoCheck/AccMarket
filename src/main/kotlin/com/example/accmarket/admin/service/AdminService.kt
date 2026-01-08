@@ -43,7 +43,6 @@ class AdminService(
         user.roles = user.roles.toMutableSet().apply { add("ADMIN") }
         userRepository.save(user)
 
-        // безопасная отправка письма после commit
         sendAfterCommit {
             emailService.sendEmail(
                 to = user.email,

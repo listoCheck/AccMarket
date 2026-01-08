@@ -104,4 +104,5 @@ class AdvertisementController(
     fun getUserAdvertisements(@PathVariable userId: UUID): Page<AdvertisementResponseDTO> {
         return advertisementService.getUserAdvertisementsByUserId(userId)
     }
+
 }
