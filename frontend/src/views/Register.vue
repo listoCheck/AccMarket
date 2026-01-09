@@ -109,10 +109,7 @@ export default {
         )
         
         if (result.success) {
-          success.value = 'Регистрация успешна! Перенаправление на страницу входа...'
-          setTimeout(() => {
-            router.push('/login')
-          }, 2000)
+          router.push('/')
         } else {
           error.value = result.message || 'Ошибка регистрации'
         }

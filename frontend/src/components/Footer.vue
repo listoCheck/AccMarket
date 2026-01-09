@@ -1,11 +1,11 @@
 <template>
   <footer class="footer">
     <div class="footer-container">
-      <p>&copy; 2024 AccMarket. Все права защищены.</p>
+      <p>&copy; 2026 AccMarket. Все права защищены.</p>
       <div class="footer-links">
-        <a href="#" class="footer-link">О проекте</a>
+        <!-- <a href="#" class="footer-link">О проекте</a>
         <a href="#" class="footer-link">Правила</a>
-        <a href="#" class="footer-link">Контакты</a>
+        <a href="#" class="footer-link">Контакты</a> -->
       </div>
     </div>
   </footer>

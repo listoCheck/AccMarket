@@ -63,7 +63,7 @@ export const useAdvertisementsStore = defineStore('advertisements', {
       this.error = null
       try {
         const response = await advertisementsAPI.create(data)
-        if (response.data.success) {
+        if (response.data.code === 200) {
           return { success: true, message: response.data.message }
         }
         return { success: false, message: response.data.message }
@@ -80,7 +80,7 @@ export const useAdvertisementsStore = defineStore('advertisements', {
       this.error = null
       try {
         const response = await advertisementsAPI.update(data)
-        if (response.data.success) {
+        if (response.data.code === 200) {
           return { success: true, message: response.data.message }
         }
         return { success: false, message: response.data.message }
@@ -97,11 +97,16 @@ export const useAdvertisementsStore = defineStore('advertisements', {
       this.error = null
       try {
         const response = await advertisementsAPI.delete(data)
-        if (response.data.success) {
+        console.log('Delete response:', response.data)
+        if (response.data.code === 200) {
+          // Удаляем объявление из локального массива
+          this.advertisements = this.advertisements.filter(ad => ad.id !== data.advertisementId)
+          console.log('Advertisement removed from store')
           return { success: true, message: response.data.message }
         }
         return { success: false, message: response.data.message }
       } catch (error) {
+        console.error('Delete error:', error)
         this.error = error.response?.data?.message || 'Ошибка удаления объявления'
         return { success: false, message: this.error }
       } finally {

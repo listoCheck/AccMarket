@@ -23,10 +23,28 @@ export const useAuthStore = defineStore('auth', {
         const response = await authAPI.register(username, email, password)
         console.log('Register response:', response.data)
         
-        if (response.data.success) {
-          return { success: true, message: response.data.message || 'Регистрация успешна!' }
+        // Проверяем, что в ответе есть body с токенами
+        if (response.data && response.data.body) {
+          const data = response.data.body
+          
+          // Сохраняем токены и данные пользователя
+          this.accessToken = data.accessToken
+          this.refreshToken = data.refreshToken
+          this.username = username
+          this.userId = data.userId
+          this.roles = ['USER']
+
+          localStorage.setItem('accessToken', data.accessToken)
+          localStorage.setItem('refreshToken', data.refreshToken)
+          localStorage.setItem('username', username)
+          localStorage.setItem('userId', data.userId)
+          localStorage.setItem('roles', JSON.stringify(['USER']))
+
+          console.log('Registration successful, user logged in automatically')
+          return { success: true, message: 'Регистрация успешна!' }
         }
-        return { success: false, message: response.data.message }
+        
+        return { success: false, message: response.data.message || 'Ошибка регистрации' }
       } catch (error) {
         console.error('Register error:', error)
         return {

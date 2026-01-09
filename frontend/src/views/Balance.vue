@@ -131,6 +131,9 @@ export default {
         showDepositModal.value = false
         depositAmount.value = 0
         await fetchBalance()
+        
+        // Уведомляем Header об изменении баланса
+        window.dispatchEvent(new CustomEvent('balance-updated'))
       } catch (err) {
         error.value = err.response?.data?.message || 'Ошибка пополнения баланса'
       } finally {
@@ -158,6 +161,9 @@ export default {
         showWithdrawModal.value = false
         withdrawAmount.value = 0
         await fetchBalance()
+        
+        // Уведомляем Header об изменении баланса
+        window.dispatchEvent(new CustomEvent('balance-updated'))
       } catch (err) {
         error.value = err.response?.data?.message || 'Ошибка вывода средств'
       } finally {

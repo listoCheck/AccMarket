@@ -18,6 +18,6 @@ export const advertisementsAPI = {
   },
 
   delete(data) {
-    return apiClient.delete('/core', { data })
+    return apiClient.post('/core', data)
   }
 }

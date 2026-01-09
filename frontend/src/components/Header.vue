@@ -10,8 +10,6 @@
         
         <template v-if="authStore.isAuthenticated">
           <router-link to="/advertisements/create" class="nav-link">Создать объявление</router-link>
-          <router-link to="/profile" class="nav-link">Профиль</router-link>
-          <router-link to="/balance" class="nav-link">Баланс</router-link>
           <router-link to="/notifications" class="nav-link">
             Уведомления
             <span v-if="unreadCount > 0" class="badge">{{ unreadCount }}</span>
@@ -25,7 +23,15 @@
             Админ-панель
           </router-link>
           
-          <button @click="handleLogout" class="btn btn-secondary">Выход</button>
+          <div class="user-info">
+            <router-link to="/profile" class="username-link">
+              {{ authStore.username }}
+            </router-link>
+            <router-link to="/balance" class="balance-link">
+              {{ balance }} ₽
+            </router-link>
+            <button @click="handleLogout" class="btn btn-secondary">Выход</button>
+          </div>
         </template>
         
         <template v-else>
@@ -40,8 +46,9 @@
 <script>
 import { useAuthStore } from '../stores/auth'
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { notificationsAPI } from '../api/notifications'
+import { balanceAPI } from '../api/balance'
 
 export default {
   name: 'Header',
@@ -49,6 +56,7 @@ export default {
     const authStore = useAuthStore()
     const router = useRouter()
     const unreadCount = ref(0)
+    const balance = ref(0)
 
     const handleLogout = async () => {
       await authStore.logout()
@@ -66,15 +74,46 @@ export default {
       }
     }
 
+    const fetchBalance = async () => {
+      if (authStore.isAuthenticated && authStore.userId) {
+        try {
+          const response = await balanceAPI.get(authStore.userId)
+          if (response.data) {
+            balance.value = response.data.amount || 0
+          }
+        } catch (error) {
+          console.error('Error fetching balance:', error)
+          balance.value = 0
+        }
+      }
+    }
+
     onMounted(() => {
       fetchUnreadCount()
-      // Poll for new notifications every 30 seconds
-      setInterval(fetchUnreadCount, 30000)
+      fetchBalance()
+      // Poll for new notifications and balance every 30 seconds
+      setInterval(() => {
+        fetchUnreadCount()
+        fetchBalance()
+      }, 30000)
+      
+      // Слушаем событие обновления баланса
+      window.addEventListener('balance-updated', fetchBalance)
+    })
+
+    // Watch for authentication changes
+    watch(() => authStore.isAuthenticated, (newVal) => {
+      if (newVal) {
+        fetchBalance()
+      } else {
+        balance.value = 0
+      }
     })
 
     return {
       authStore,
       unreadCount,
+      balance,
       handleLogout
     }
   }
@@ -141,6 +180,41 @@ export default {
   padding: 2px 6px;
   font-size: 0.75rem;
   font-weight: bold;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 1rem;
+  border-left: 1px solid rgba(255,255,255,0.2);
+}
+
+.username-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.username-link:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.balance-link {
+  color: #2ecc71;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.balance-link:hover {
+  background: rgba(46, 204, 113, 0.1);
 }
 
 .btn {

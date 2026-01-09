@@ -40,24 +40,33 @@
           <span class="ad-genre">{{ ad.genre }}</span>
         </div>
         <div class="ad-meta">
-          <span>Автор: {{ ad.authorUsername }}</span>
           <span>{{ formatDate(ad.createdAt) }}</span>
         </div>
         <div class="ad-actions">
-          <button
-            v-if="authStore.userId === ad.authorId"
-            @click="editAdvertisement(ad)"
-            class="btn btn-secondary btn-sm"
-          >
-            Редактировать
-          </button>
-          <button
-            v-if="authStore.userId === ad.authorId"
-            @click="deleteAdvertisement(ad)"
-            class="btn btn-danger btn-sm"
-          >
-            Удалить
-          </button>
+          <template v-if="authStore.isAuthenticated">
+            <template v-if="authStore.userId === ad.userId">
+              <button
+                @click="editAdvertisement(ad)"
+                class="btn btn-secondary btn-sm"
+              >
+                Редактировать
+              </button>
+              <button
+                @click="deleteAdvertisement(ad)"
+                class="btn btn-danger btn-sm"
+              >
+                Удалить
+              </button>
+            </template>
+            <template v-else>
+              <button
+                @click="buyAdvertisement(ad)"
+                class="btn btn-primary btn-sm"
+              >
+                Купить
+              </button>
+            </template>
+          </template>
         </div>
       </div>
     </div>
@@ -146,10 +155,17 @@ export default {
 
         if (result.success) {
           alert('Объявление успешно удалено')
-          fetchAdvertisements()
+          // Store автоматически удалит объявление из списка
         } else {
           alert(result.message || 'Ошибка удаления объявления')
         }
+      }
+    }
+
+    const buyAdvertisement = async (ad) => {
+      if (confirm(`Вы уверены, что хотите купить "${ad.title}" за ${ad.cost} ₽?`)) {
+        // TODO: Реализовать логику покупки через API
+        alert('Функция покупки будет реализована позже')
       }
     }
 
@@ -175,6 +191,7 @@ export default {
       changePage,
       editAdvertisement,
       deleteAdvertisement,
+      buyAdvertisement,
       formatDate
     }
   }

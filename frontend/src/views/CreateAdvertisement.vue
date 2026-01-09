@@ -114,6 +114,7 @@ export default {
         const result = await adsStore.createAdvertisement({
           username: authStore.username,
           token: authStore.accessToken,
+          userId: authStore.userId,
           title: form.value.title,
           text: form.value.text,
           cost: form.value.cost,
@@ -123,10 +124,7 @@ export default {
         })
 
         if (result.success) {
-          success.value = 'Объявление успешно создано! Перенаправление...'
-          setTimeout(() => {
-            router.push('/advertisements')
-          }, 1500)
+          router.push('/advertisements')
         } else {
           error.value = result.message || 'Ошибка создания объявления'
         }
