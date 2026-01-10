@@ -42,15 +42,23 @@ export const useAdvertisementsStore = defineStore('advertisements', {
       this.error = null
       try {
         const response = await advertisementsAPI.getUserAdvertisements(userId)
-        this.advertisements = response.data.content
+        console.log('API response for user advertisements:', response.data)
+        console.log('Content:', response.data.content)
+        console.log('Content length:', response.data.content?.length)
+        
+        this.advertisements = response.data.content || []
         this.pagination = {
-          page: response.data.number,
-          size: response.data.size,
-          totalPages: response.data.totalPages,
-          totalElements: response.data.totalElements
+          page: response.data.number || 0,
+          size: response.data.size || 10,
+          totalPages: response.data.totalPages || 0,
+          totalElements: response.data.totalElements || 0
         }
+        
+        console.log('Advertisements set to:', this.advertisements)
+        console.log('Advertisements length:', this.advertisements.length)
         return { success: true }
       } catch (error) {
+        console.error('Error in fetchUserAdvertisements:', error)
         this.error = error.response?.data?.message || 'Ошибка загрузки объявлений'
         return { success: false, message: this.error }
       } finally {

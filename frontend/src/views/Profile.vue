@@ -42,11 +42,11 @@
         >
           <div class="ad-content">
             <h3>{{ ad.title }}</h3>
-            <p>{{ ad.description }}</p>
+            <p class="ad-description">{{ ad.text }}</p>
             <div class="ad-meta">
-              <span class="ad-price">{{ ad.price }} ₽</span>
-              <span class="ad-type">{{ ad.type }}</span>
-              <span class="ad-date">{{ formatDate(ad.createdAt) }}</span>
+              <span class="ad-price">{{ ad.cost }} ₽</span>
+              <span class="ad-type" v-if="ad.platform">{{ ad.platform }}</span>
+              <span class="ad-type genre" v-if="ad.genre">{{ ad.genre }}</span>
             </div>
           </div>
           <div class="ad-actions">
@@ -92,11 +92,15 @@ export default {
       error.value = ''
 
       try {
+        console.log('Fetching advertisements for user:', authStore.userId)
         const result = await adsStore.fetchUserAdvertisements(authStore.userId)
+        console.log('Fetch result:', result)
+        console.log('Advertisements in store:', adsStore.advertisements)
         if (!result.success) {
           error.value = result.message || 'Ошибка загрузки объявлений'
         }
       } catch (err) {
+        console.error('Error fetching advertisements:', err)
         error.value = 'Произошла ошибка при загрузке объявлений'
       } finally {
         loading.value = false
@@ -118,17 +122,11 @@ export default {
 
         if (result.success) {
           alert('Объявление успешно удалено')
-          fetchUserAdvertisements()
+          // Store автоматически удалит объявление из списка
         } else {
           alert(result.message || 'Ошибка удаления объявления')
         }
       }
-    }
-
-    const formatDate = (dateString) => {
-      if (!dateString) return ''
-      const date = new Date(dateString)
-      return date.toLocaleDateString('ru-RU')
     }
 
     onMounted(() => {
@@ -141,8 +139,7 @@ export default {
       error,
       advertisements,
       editAdvertisement,
-      deleteAdvertisement,
-      formatDate
+      deleteAdvertisement
     }
   }
 }
@@ -240,9 +237,13 @@ export default {
   margin-bottom: 0.5rem;
 }
 
-.ad-content p {
+.ad-description {
   color: #7f8c8d;
   margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .ad-meta {
@@ -264,6 +265,10 @@ export default {
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-size: 0.875rem;
+}
+
+.ad-type.genre {
+  background: #9b59b6;
 }
 
 .ad-date {

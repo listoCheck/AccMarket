@@ -22,4 +22,10 @@ interface AdvertisementRepository : JpaRepository<Advertisement, UUID> {
         ended: Boolean,
         pageable: Pageable
     ): Page<Advertisement>
+    
+    fun findAllByUserIdAndEnded(
+        userId: UUID,
+        ended: Boolean,
+        pageable: Pageable
+    ): Page<Advertisement>
 }
