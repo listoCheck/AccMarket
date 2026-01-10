@@ -10,5 +10,7 @@ data class AdvertisementDTO(
     val cost: Int,
     val platform: String,
     val genre: String,
+    val gameLogin: String,
+    val gamePassword: String,
     val advertisementId : UUID?,
 )

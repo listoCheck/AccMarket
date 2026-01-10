@@ -11,6 +11,7 @@ import com.example.accmarket.core.models.DTO.AdvertisementDTO
 import com.example.accmarket.core.models.DTO.BoughtAdvertisementDTO
 import com.example.accmarket.core.models.DTO.BuyAdvertisementDTO
 import com.example.accmarket.core.models.DTO.DeleteAdvertisementDTO
+import com.example.accmarket.core.models.GameAccount
 import com.example.accmarket.core.models.Type
 import com.example.accmarket.core.repository.AdvertisementRepository
 import com.example.accmarket.core.repository.GameAccountRepository
@@ -66,6 +67,15 @@ class AdvertisementService(
         )
 
         advertisementRepository.save(adv)
+
+        val gameAccount = GameAccount(
+            advertisement = adv,
+            login = request.gameLogin,
+            password = request.gamePassword
+        )
+
+        gameAccountRepository.save(gameAccount)
+
 
         sendAfterCommit {
             notificationService.send(
@@ -124,6 +134,14 @@ class AdvertisementService(
         }
 
         advertisementRepository.save(adv)
+        val account = gameAccountRepository.findByAdvertisementId(adv.id)
+            ?: throw IllegalStateException("Game account not found")
+
+        account.login = request.gameLogin
+        account.password = request.gamePassword
+
+        gameAccountRepository.save(account)
+
 
         return if (bannedWords.isNotEmpty()) {
             Response(
