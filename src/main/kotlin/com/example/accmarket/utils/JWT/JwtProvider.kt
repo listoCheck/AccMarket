@@ -10,6 +10,7 @@ import com.nimbusds.jwt.SignedJWT
 import org.springframework.stereotype.Component
 import java.text.ParseException
 import java.util.Date
+import java.util.UUID
 
 @Component
 class JwtProvider(private val rsaKey: RSAKey) {
@@ -75,5 +76,17 @@ class JwtProvider(private val rsaKey: RSAKey) {
             null
         }
     }
+    fun getUserId(authorizationHeader: String): UUID {
+        val token = authorizationHeader.removePrefix("Bearer ").trim()
+
+        val claims = parseAndValidateToken(token)
+            ?: throw IllegalArgumentException("Invalid or expired token")
+
+        val userId = claims.getStringClaim("userId")
+            ?: throw IllegalStateException("userId claim not found")
+
+        return UUID.fromString(userId)
+    }
+
 
 }

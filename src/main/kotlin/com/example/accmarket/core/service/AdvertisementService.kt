@@ -3,11 +3,17 @@ package com.example.accmarket.core.service
 import AdvertisementResponseDTO
 import com.example.accmarket.auth.repository.UserRepository
 import com.example.accmarket.auth.service.TokenService
+import com.example.accmarket.balance.models.DTO.BalanceOperationDTO
+import com.example.accmarket.balance.service.BalanceService
 import com.example.accmarket.core.models.Advertisement
+import com.example.accmarket.core.models.AdvertisementStatus
 import com.example.accmarket.core.models.DTO.AdvertisementDTO
+import com.example.accmarket.core.models.DTO.BoughtAdvertisementDTO
+import com.example.accmarket.core.models.DTO.BuyAdvertisementDTO
 import com.example.accmarket.core.models.DTO.DeleteAdvertisementDTO
 import com.example.accmarket.core.models.Type
 import com.example.accmarket.core.repository.AdvertisementRepository
+import com.example.accmarket.core.repository.GameAccountRepository
 import com.example.accmarket.notification.models.NotificationType
 import com.example.accmarket.notification.service.NotificationService
 import com.example.accmarket.utils.JWT.JwtProvider
@@ -18,6 +24,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.util.Date
 import java.util.UUID
 
@@ -28,7 +35,9 @@ class AdvertisementService(
     private val tokenService: TokenService,
     private val jwtProvider: JwtProvider,
     private val banwordService: Banword,
-    private val notificationService: NotificationService
+    private val notificationService: NotificationService,
+    private val gameAccountRepository: GameAccountRepository,
+    private val balanceService: BalanceService
 ) {
 
     @Transactional
@@ -236,6 +245,76 @@ class AdvertisementService(
             pageable
         )
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
+    }
+
+
+    @Transactional
+    fun buy(dto: BuyAdvertisementDTO, buyerToken: String): Response {
+        val buyerId = jwtProvider.getUserId(buyerToken)
+
+        val ad = advertisementRepository.findById(dto.advertisementId)
+            .orElseThrow { IllegalArgumentException("Advertisement not found") }
+
+        require(ad.status == AdvertisementStatus.MODERATION_APPROVED) {
+            "Advertisement not available"
+        }
+
+        require(ad.userId != buyerId) {
+            "You can't buy your own advertisement"
+        }
+
+        balanceService.withdraw(
+            BalanceOperationDTO(
+                userId = buyerId,
+                amount = BigDecimal(ad.cost)
+            )
+        )
+
+        ad.status = AdvertisementStatus.BOUGHT
+        ad.buyerId = buyerId
+        ad.ended = true
+
+        advertisementRepository.save(ad)
+
+        val gameAccount = gameAccountRepository.findByAdvertisementId(ad.id)
+            ?: throw IllegalStateException("Game account not found")
+
+        sendAfterCommit {
+            notificationService.send(
+                ad.userId,
+                NotificationType.AD_BOUGHT,
+                "Advertisement sold",
+                "Your advertisement \"${ad.title}\" was purchased."
+            )
+
+            notificationService.send(
+                buyerId,
+                NotificationType.AD_BOUGHT,
+                "Purchase successful",
+                "Login: ${gameAccount.login}\nPassword: ${gameAccount.password}"
+            )
+        }
+
+        return Response(code = 200, message = "Advertisement bought successfully")
+    }
+
+    fun getBought(userId: UUID): List<BoughtAdvertisementDTO> {
+        val ads = advertisementRepository.findAllByBuyerId(userId)
+
+        return ads.map {
+            val acc = gameAccountRepository.findByAdvertisementId(it.id)!!
+            BoughtAdvertisementDTO(
+                advertisementId = it.id,
+                title = it.title,
+                login = acc.login,
+                password = acc.password
+            )
+        }
+    }
+
+    fun getByCreator(userId: UUID): List<AdvertisementResponseDTO> {
+        return advertisementRepository.findAllByUserId(userId)
+            .map { AdvertisementResponseDTO.fromEntity(it) }
     }
 
 }

@@ -41,7 +41,7 @@ dependencies {
     implementation("com.graphql-java:java-dataloader:3.3.0")
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
-
+    implementation("org.postgresql:postgresql:42.7.3")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.mockito")
     }

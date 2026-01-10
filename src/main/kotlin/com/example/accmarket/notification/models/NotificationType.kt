@@ -6,5 +6,6 @@ enum class NotificationType {
     APPEAL_CREATED,
     APPEAL_APPROVED,
     APPEAL_REJECTED,
-    SYSTEM
+    SYSTEM,
+    AD_BOUGHT
 }

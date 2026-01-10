@@ -8,12 +8,16 @@ import java.util.*
 @Entity
 @Table(name = "advertisement")
 data class Advertisement(
+
     @Id
     @Column(columnDefinition = "UUID")
     val id: UUID = UUID.randomUUID(),
 
     @Column(columnDefinition = "UUID")
     val userId: UUID,
+
+    @Column
+    var buyerId: UUID? = null,
 
     @Column
     var title: String,
@@ -24,15 +28,19 @@ data class Advertisement(
     @Column
     var cost: Int,
 
-    @OneToOne(mappedBy = "advertisement", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var type: Type? = null,
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    var status: AdvertisementStatus = AdvertisementStatus.CREATED,
 
-    @Column
-    var rejected: Boolean?,
+    @OneToOne(mappedBy = "advertisement", cascade = [CascadeType.ALL])
+    var type: Type? = null,
 
     @Column
     var createdAt: Date,
 
     @Column
     var ended: Boolean = false,
+
+    @Column
+    var rejected: Boolean? = null,
 )
