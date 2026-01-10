@@ -26,4 +26,10 @@ interface AdvertisementRepository : JpaRepository<Advertisement, UUID> {
     fun findAllByBuyerId(buyerId: UUID): List<Advertisement>
     fun findAllByUserId(userId: UUID): List<Advertisement>
 
+    
+    fun findAllByUserIdAndEnded(
+        userId: UUID,
+        ended: Boolean,
+        pageable: Pageable
+    ): Page<Advertisement>
 }

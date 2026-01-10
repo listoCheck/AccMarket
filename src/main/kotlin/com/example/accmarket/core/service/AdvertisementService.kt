@@ -238,10 +238,10 @@ class AdvertisementService(
         sortBy: String = "createdAt",
     ): Page<AdvertisementResponseDTO> {
         val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
-        val adsPage = advertisementRepository.findAllByUserIdAndRejectedAndEnded(
+        // Используем новый метод, который возвращает все объявления пользователя (и отклоненные, и принятые)
+        val adsPage = advertisementRepository.findAllByUserIdAndEnded(
             userId,
-            null,
-            false,
+            false,  // только не завершенные
             pageable
         )
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }

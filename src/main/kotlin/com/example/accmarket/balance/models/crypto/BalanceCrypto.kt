@@ -8,10 +8,14 @@ import javax.crypto.spec.SecretKeySpec
 object BalanceCrypto {
 
     private const val ALGORITHM = "AES"
-    @Value("\${SECRET}")
-    private lateinit var secret: String
 
-    private val key = SecretKeySpec(secret.toByteArray(), ALGORITHM)
+    private val key by lazy {
+        val secret = System.getenv("SECRET")
+            ?: System.getProperty("SECRET")
+            ?: throw IllegalStateException("SECRET не установлен")
+
+        SecretKeySpec(secret.toByteArray(), ALGORITHM)
+    }
 
     fun encrypt(value: String): String {
         val cipher = Cipher.getInstance(ALGORITHM)
