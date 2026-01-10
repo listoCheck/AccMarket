@@ -55,7 +55,7 @@ class AdvertisementService(
             title = request.title,
             text = request.text,
             cost = request.cost,
-            //rejected = bannedWords.isNotEmpty(),
+            rejected = bannedWords.isNotEmpty(),
             createdAt = Date()
         )
 
@@ -115,7 +115,7 @@ class AdvertisementService(
         val bannedWords = banwordService.find("${request.title} ${request.text}")
 
         adv.apply {
-            //rejected = bannedWords.isNotEmpty()
+            rejected = bannedWords.isNotEmpty()
             title = request.title
             text = request.text
             cost = request.cost

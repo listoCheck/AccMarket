@@ -39,5 +39,8 @@ data class Advertisement(
     var createdAt: Date,
 
     @Column
-    var ended: Boolean = false
+    var ended: Boolean = false,
+
+    @Column
+    var rejected: Boolean? = null,
 )
