@@ -26,5 +26,6 @@ fun main(args: Array<String>) {
     System.setProperty("EMAIL_CODE_EDU", dotenv["EMAIL_CODE_EDU"])
     System.setProperty("EMAIL_HOST", dotenv["EMAIL_HOST"])
     System.setProperty("EMAIL_PORT", dotenv["EMAIL_PORT"])
+    System.setProperty("SECRET", dotenv["SECRET"])
     runApplication<AccMarketApplication>(*args)
 }

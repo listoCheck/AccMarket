@@ -15,30 +15,50 @@ class SecurityConfig {
         return BCryptPasswordEncoder()
     }
 
+//    @Bean
+//    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+//        http
+//            .csrf { csrf -> csrf.disable() }
+//            .authorizeHttpRequests { auth ->
+//                auth
+//                    .requestMatchers("/auth/register", "/auth/login", "/auth/logout").permitAll()
+//
+//                    .requestMatchers("/admin/**").permitAll()
+//
+//                    .requestMatchers("/core/**").permitAll()
+//
+//                    .requestMatchers(
+//                        "/notifications/**"
+//                    ).permitAll()
+//
+//                    .requestMatchers(
+//                        "/appeals/**"
+//                    ).permitAll()
+//
+//                    .requestMatchers(
+//                        "/admin/moderation/**"
+//                    ).permitAll()
+//
+//                    .requestMatchers(
+//                        "/balance/**"
+//                    ).permitAll()
+//
+//                    .requestMatchers(
+//                        "/swagger-ui/**",
+//                        "/v3/api-docs/**",
+//                        "/swagger-ui.html"
+//                    ).permitAll()
+//
+//                    .anyRequest().authenticated()
+//            }
+//        return http.build()
+//    }
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { csrf -> csrf.disable() }
             .authorizeHttpRequests { auth ->
-                auth
-                    .requestMatchers("/auth/register", "/auth/login", "/auth/logout").permitAll()
-
-                    .requestMatchers("/admin/**").permitAll()
-
-                    .requestMatchers(
-                        "/core/make-advertisement",
-                        "/core/edit-advertisement",
-                        "/core",
-                        "/core/**"
-                    ).permitAll()
-
-                    .requestMatchers(
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/swagger-ui.html"
-                    ).permitAll()
-
-                    .anyRequest().authenticated()
+                auth.anyRequest().permitAll()  // Разрешаем ВСЕ запросы
             }
         return http.build()
     }
