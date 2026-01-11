@@ -51,32 +51,40 @@ class AdvertisementService(
 
         val bannedWords = banwordService.find("${request.title} ${request.text}")
 
+        // Создаем Advertisement
         val adv = Advertisement(
             userId = user.id,
             title = request.title,
             text = request.text,
             cost = request.cost,
             rejected = bannedWords.isNotEmpty(),
+            status = if (bannedWords.isEmpty())
+                AdvertisementStatus.MODERATION_APPROVED
+            else
+                AdvertisementStatus.MODERATION_PENDING,
             createdAt = Date()
         )
 
-        adv.type = Type(
+        // Создаем Type и присваиваем объект Advertisement
+        val type = Type(
             advertisement = adv,
             platform = request.platform,
             genre = request.genre
         )
+        adv.type = type
 
-
-
+        // Создаем GameAccount
         val gameAccount = GameAccount(
             advertisement = adv,
             login = request.gameLogin,
             password = request.gamePassword
         )
+        adv.gameAccount = gameAccount
 
-        //gameAccountRepository.save(gameAccount)
-        advertisementRepository.save(adv)
+        // Сохраняем Advertisement, Hibernate автоматически сохранит связанные объекты
+        advertisementRepository.saveAndFlush(adv)
 
+        // Отправка уведомления после успешной транзакции
         sendAfterCommit {
             notificationService.send(
                 user.id,
@@ -108,6 +116,7 @@ class AdvertisementService(
             )
         }
     }
+
 
     fun editAdvertisement(request: AdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
@@ -141,6 +150,8 @@ class AdvertisementService(
         account.password = request.gamePassword
 
         //gameAccountRepository.save(account)
+        adv.gameAccount = account
+
         advertisementRepository.save(adv)
 
         return if (bannedWords.isNotEmpty()) {

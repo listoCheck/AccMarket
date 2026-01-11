@@ -1,24 +1,22 @@
 package com.example.accmarket.core.models
 
 import jakarta.persistence.*
+import org.hibernate.annotations.GenericGenerator
 import java.util.*
 
 @Entity
 @Table(name = "game_accounts")
-class GameAccount(
-
+data class GameAccount(
     @Id
-    @Column(columnDefinition = "UUID")
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     var id: UUID? = null,
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
+    @OneToOne
     @JoinColumn(name = "advertisement_id")
     var advertisement: Advertisement,
 
-    @Column(nullable = false)
     var login: String,
-
-    @Column(nullable = false)
     var password: String
 )
+
