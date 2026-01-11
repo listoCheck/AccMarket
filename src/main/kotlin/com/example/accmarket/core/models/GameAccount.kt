@@ -4,17 +4,17 @@ import jakarta.persistence.*
 import java.util.*
 
 @Entity
-@Table(name = "game_account")
-data class GameAccount(
+@Table(name = "game_accounts")
+class GameAccount(
 
     @Id
-    @GeneratedValue
     @Column(columnDefinition = "UUID")
-    val id: UUID = UUID.randomUUID(),
+    var id: UUID? = null,
 
-    @OneToOne
-    @JoinColumn(name = "advertisement_id", nullable = false, unique = true)
-    val advertisement: Advertisement,
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "advertisement_id")
+    var advertisement: Advertisement,
 
     @Column(nullable = false)
     var login: String,

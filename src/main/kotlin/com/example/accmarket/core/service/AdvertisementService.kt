@@ -66,7 +66,7 @@ class AdvertisementService(
             genre = request.genre
         )
 
-        advertisementRepository.save(adv)
+
 
         val gameAccount = GameAccount(
             advertisement = adv,
@@ -74,8 +74,8 @@ class AdvertisementService(
             password = request.gamePassword
         )
 
-        gameAccountRepository.save(gameAccount)
-
+        //gameAccountRepository.save(gameAccount)
+        advertisementRepository.save(adv)
 
         sendAfterCommit {
             notificationService.send(
@@ -133,15 +133,15 @@ class AdvertisementService(
             type?.genre = request.genre
         }
 
-        advertisementRepository.save(adv)
+
         val account = gameAccountRepository.findByAdvertisementId(adv.id)
             ?: throw IllegalStateException("Game account not found")
 
         account.login = request.gameLogin
         account.password = request.gamePassword
 
-        gameAccountRepository.save(account)
-
+        //gameAccountRepository.save(account)
+        advertisementRepository.save(adv)
 
         return if (bannedWords.isNotEmpty()) {
             Response(

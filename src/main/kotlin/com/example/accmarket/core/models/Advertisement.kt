@@ -43,4 +43,8 @@ data class Advertisement(
 
     @Column
     var rejected: Boolean? = null,
+
+    @OneToOne(mappedBy = "advertisement", cascade = [CascadeType.ALL], orphanRemoval = true)
+    var gameAccount: GameAccount? = null
+
 )
