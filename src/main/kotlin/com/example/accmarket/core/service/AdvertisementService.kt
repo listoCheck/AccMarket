@@ -228,20 +228,6 @@ class AdvertisementService(
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
     }
 
-    private fun sendAfterCommit(action: () -> Unit) {
-        org.springframework.transaction.support.TransactionSynchronizationManager
-            .registerSynchronization(object :
-                org.springframework.transaction.support.TransactionSynchronization {
-
-                override fun afterCommit() {
-                    try {
-                        action()
-                    } catch (_: Exception) {
-                    }
-                }
-            })
-    }
-
     fun getUserAdvertisementsByUserName(
         userName: String,
         page: Int = 0,
@@ -267,10 +253,9 @@ class AdvertisementService(
         sortBy: String = "createdAt",
     ): Page<AdvertisementResponseDTO> {
         val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
-        // Используем новый метод, который возвращает все объявления пользователя (и отклоненные, и принятые)
         val adsPage = advertisementRepository.findAllByUserIdAndEnded(
             userId,
-            false,  // только не завершенные
+            false,
             pageable
         )
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
@@ -309,23 +294,22 @@ class AdvertisementService(
             ?: throw IllegalStateException("Game account not found")
 
         sendAfterCommit {
-            notificationService.send(
-                ad.userId,
-                NotificationType.AD_BOUGHT,
-                "Advertisement sold",
-                "Your advertisement \"${ad.title}\" was purchased."
-            )
-
-            notificationService.send(
-                buyerId,
-                NotificationType.AD_BOUGHT,
-                "Purchase successful",
-                "Login: ${gameAccount.login}\nPassword: ${gameAccount.password}"
-            )
+            safeSendNotification(ad.userId, "Advertisement sold", "Your advertisement \"${ad.title}\" was purchased.")
+            safeSendNotification(buyerId, "Purchase successful", "Login: ${gameAccount.login}\nPassword: ${gameAccount.password}")
         }
 
         return Response(code = 200, message = "Advertisement bought successfully")
     }
+
+    private fun safeSendNotification(userId: UUID, title: String, message: String) {
+        try {
+            notificationService.send(userId, NotificationType.AD_BOUGHT, title, message)
+        } catch (ex: Exception) {
+            println("Ошибка при отправке уведомления пользователю $userId: ${ex.message}")
+        }
+    }
+
+
 
     fun getBought(userId: UUID): List<BoughtAdvertisementDTO> {
         val ads = advertisementRepository.findAllByBuyerId(userId)
@@ -345,5 +329,21 @@ class AdvertisementService(
         return advertisementRepository.findAllByUserId(userId)
             .map { AdvertisementResponseDTO.fromEntity(it) }
     }
+
+    private fun sendAfterCommit(action: () -> Unit) {
+        org.springframework.transaction.support.TransactionSynchronizationManager
+            .registerSynchronization(object :
+                org.springframework.transaction.support.TransactionSynchronization {
+
+                override fun afterCommit() {
+                    try {
+                        action()
+                    } catch (ex: Exception) {
+                        println("Ошибка при отправке уведомления: ${ex.message}")
+                    }
+                }
+            })
+    }
+
 
 }
