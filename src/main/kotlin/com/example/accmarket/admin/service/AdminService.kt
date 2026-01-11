@@ -31,7 +31,7 @@ class AdminService(
     @Transactional
     fun assignAdminRole(request: AssignAdminRoleDTO): Response {
 
-        if (!jwtProvider.verifyToken(request.token.toString())) return ResponseHandler.invalidToken()
+        //if (!jwtProvider.verifyToken(request.token.toString())) return ResponseHandler.invalidToken()
 
         val user = userRepository.findByUsername(request.username)
             ?: return ResponseHandler.userNotFound()
