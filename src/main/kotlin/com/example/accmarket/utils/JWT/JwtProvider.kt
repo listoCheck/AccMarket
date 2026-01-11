@@ -17,29 +17,39 @@ class JwtProvider(private val rsaKey: RSAKey) {
     private val signerRefresh = RSASSASigner(rsaKey.toPrivateKey())
     private val signerAccess = RSASSASigner(rsaKey.toPrivateKey())
 
-    fun createRefreshToken(username: String, roles: Collection<String>, lifetimeSeconds: Long = 60 * 60 * 24 * 30): String {
+    fun createRefreshToken(username: String, roles: Collection<String>, userId: UUID? = null, lifetimeSeconds: Long = 60 * 60 * 24 * 30): String {
         val now = Date()
         val exp = Date(now.time + lifetimeSeconds * 1000)
-        val claims = JWTClaimsSet.Builder()
+        val claimsBuilder = JWTClaimsSet.Builder()
             .subject(username)
             .issueTime(now)
             .expirationTime(exp)
             .claim("roles", roles)
-            .build()
+        
+        if (userId != null) {
+            claimsBuilder.claim("userId", userId.toString())
+        }
+        
+        val claims = claimsBuilder.build()
         val signedJWT = SignedJWT(JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey.keyID).build(), claims)
         signedJWT.sign(signerRefresh)
         return signedJWT.serialize()
     }
 
-    fun createAccessToken(username: String, roles: Collection<String>, lifetimeSeconds: Long = 3600): String {
+    fun createAccessToken(username: String, roles: Collection<String>, userId: UUID? = null, lifetimeSeconds: Long = 3600): String {
         val now = Date()
         val exp = Date(now.time + lifetimeSeconds * 1000)
-        val claims = JWTClaimsSet.Builder()
+        val claimsBuilder = JWTClaimsSet.Builder()
             .subject(username)
             .issueTime(now)
             .expirationTime(exp)
             .claim("roles", roles)
-            .build()
+        
+        if (userId != null) {
+            claimsBuilder.claim("userId", userId.toString())
+        }
+        
+        val claims = claimsBuilder.build()
         val signedJWT = SignedJWT(JWSHeader.Builder(JWSAlgorithm.RS256).keyID(rsaKey.keyID).build(), claims)
         signedJWT.sign(signerAccess)
         return signedJWT.serialize()

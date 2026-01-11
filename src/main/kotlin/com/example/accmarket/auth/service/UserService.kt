@@ -39,8 +39,8 @@ class UserService(
             password = passwordEncoder.encode(password)
         )
 
-        val refreshToken = jwtProvider.createRefreshToken(username, listOf("USER"))
-        val accessToken = jwtProvider.createAccessToken(username, listOf("USER"))
+        val refreshToken = jwtProvider.createRefreshToken(username, listOf("USER"), user.id)
+        val accessToken = jwtProvider.createAccessToken(username, listOf("USER"), user.id)
 
         user.token = Token(
             user = user,
@@ -76,8 +76,8 @@ class UserService(
             ?: return ResponseHandler.userNotFound()
 
         return if (passwordEncoder.matches(password, user.password)) {
-            val refreshToken = jwtProvider.createRefreshToken(username, listOf("USER"))
-            val accessToken = jwtProvider.createAccessToken(username, listOf("USER"))
+            val refreshToken = jwtProvider.createRefreshToken(username, listOf("USER"), user.id)
+            val accessToken = jwtProvider.createAccessToken(username, listOf("USER"), user.id)
             tokenRepository.updateUserToken(user.id, refreshToken)
 
             ResponseHandler.success(
@@ -117,7 +117,7 @@ class UserService(
         val tokenEntity = tokenRepository.findByUserId(user.id)
         if (tokenEntity.refreshToken != token) return ResponseHandler.invalidToken()
 
-        val newAccessToken = jwtProvider.createAccessToken(username, listOf("USER"))
+        val newAccessToken = jwtProvider.createAccessToken(username, listOf("USER"), user.id)
         return ResponseHandler.success(body = mapOf("accessToken" to newAccessToken))
     }
 

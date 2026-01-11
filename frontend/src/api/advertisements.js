@@ -19,5 +19,17 @@ export const advertisementsAPI = {
 
   delete(data) {
     return apiClient.post('/core', data)
+  },
+
+  buy(advertisementId) {
+    return apiClient.post('/core/buy', { advertisementId })
+  },
+
+  getBought() {
+    return apiClient.get('/core/cabinet/buyer')
+  },
+
+  getCreated() {
+    return apiClient.get('/core/cabinet/seller')
   }
 }

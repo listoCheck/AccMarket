@@ -126,10 +126,18 @@ export const useAuthStore = defineStore('auth', {
         }
 
         const response = await authAPI.updateToken(this.username, this.refreshToken)
-        if (response.data.success) {
-          const newAccessToken = response.data.data.accessToken
+        if (response.data.code === 200 && response.data.body) {
+          const newAccessToken = response.data.body.accessToken
+          const newRefreshToken = response.data.body.refreshToken
+          
           this.accessToken = newAccessToken
           localStorage.setItem('accessToken', newAccessToken)
+          
+          if (newRefreshToken) {
+            this.refreshToken = newRefreshToken
+            localStorage.setItem('refreshToken', newRefreshToken)
+          }
+          
           return true
         }
         
@@ -139,6 +147,15 @@ export const useAuthStore = defineStore('auth', {
         this.clearAuth()
         return false
       }
+    },
+
+    // Метод для синхронизации токенов из localStorage (вызывается interceptor'ом)
+    syncTokensFromStorage() {
+      this.accessToken = localStorage.getItem('accessToken')
+      this.refreshToken = localStorage.getItem('refreshToken')
+      this.username = localStorage.getItem('username')
+      this.userId = localStorage.getItem('userId')
+      this.roles = JSON.parse(localStorage.getItem('roles') || '[]')
     }
   }
 })
