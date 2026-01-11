@@ -68,6 +68,28 @@
         />
       </div>
 
+      <div class="form-group">
+        <label for="gameLogin">Логин от аккаунта</label>
+        <input
+          id="gameLogin"
+          v-model="form.gameLogin"
+          type="text"
+          required
+          placeholder="Введите логин от игрового аккаунта"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="gamePassword">Пароль от аккаунта</label>
+        <input
+          id="gamePassword"
+          v-model="form.gamePassword"
+          type="password"
+          required
+          placeholder="Введите пароль от игрового аккаунта"
+        />
+      </div>
+
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" :disabled="loading">
           {{ loading ? 'Сохранение...' : 'Сохранить изменения' }}
@@ -104,7 +126,9 @@ export default {
       text: '',
       cost: 0,
       platform: '',
-      genre: ''
+      genre: '',
+      gameLogin: '',
+      gamePassword: ''
     })
 
     const loading = ref(false)
@@ -120,7 +144,9 @@ export default {
           text: currentAd.text,
           cost: currentAd.cost,
           platform: currentAd.platform,
-          genre: currentAd.genre
+          genre: currentAd.genre,
+          gameLogin: currentAd.gameLogin || '',
+          gamePassword: currentAd.gamePassword || ''
         }
       } else {
         error.value = 'Объявление не найдено'
@@ -144,7 +170,9 @@ export default {
           text: form.value.text,
           cost: form.value.cost,
           platform: form.value.platform,
-          genre: form.value.genre
+          genre: form.value.genre,
+          gameLogin: form.value.gameLogin,
+          gamePassword: form.value.gamePassword
         })
 
         if (result.success) {

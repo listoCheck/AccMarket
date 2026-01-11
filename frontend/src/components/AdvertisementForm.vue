@@ -62,7 +62,29 @@
             placeholder="Например: MMORPG, Shooter"
           />
         </div>
-
+  
+        <div class="form-group">
+          <label for="gameLogin">Логин от аккаунта *</label>
+          <input
+            id="gameLogin"
+            v-model="form.gameLogin"
+            type="text"
+            required
+            placeholder="Введите логин от игрового аккаунта"
+          />
+        </div>
+  
+        <div class="form-group">
+          <label for="gamePassword">Пароль от аккаунта *</label>
+          <input
+            id="gamePassword"
+            v-model="form.gamePassword"
+            type="password"
+            required
+            placeholder="Введите пароль от игрового аккаунта"
+          />
+        </div>
+  
         <div v-if="error" class="error-message">{{ error }}</div>
 
         <div class="form-actions">
@@ -102,7 +124,9 @@ export default {
       text: '',
       cost: 0,
       platform: '',
-      genre: ''
+      genre: '',
+      gameLogin: '',
+      gamePassword: ''
     })
 
     const isEdit = computed(() => !!props.advertisement)
@@ -114,7 +138,9 @@ export default {
           text: props.advertisement.text || '',
           cost: props.advertisement.cost || 0,
           platform: props.advertisement.platform || '',
-          genre: props.advertisement.genre || ''
+          genre: props.advertisement.genre || '',
+          gameLogin: props.advertisement.gameLogin || '',
+          gamePassword: props.advertisement.gamePassword || ''
         }
       }
     })
@@ -131,7 +157,9 @@ export default {
           text: form.value.text,
           cost: form.value.cost,
           platform: form.value.platform || '',
-          genre: form.value.genre || ''
+          genre: form.value.genre || '',
+          gameLogin: form.value.gameLogin,
+          gamePassword: form.value.gamePassword
         }
 
         if (isEdit.value) {
