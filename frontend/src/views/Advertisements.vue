@@ -18,10 +18,6 @@
 
     <div v-if="loading" class="loading">Загрузка...</div>
 
-    <div v-else-if="error" class="alert alert-error">
-      {{ error }}
-    </div>
-
     <div v-else-if="advertisements.length === 0" class="empty-state">
       <p>Объявлений пока нет</p>
     </div>
