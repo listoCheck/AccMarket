@@ -284,6 +284,13 @@ class AdvertisementService(
             )
         )
 
+        balanceService.deposit(
+            BalanceOperationDTO(
+                userId = ad.userId,
+                amount = BigDecimal(ad.cost)
+            )
+        )
+
         ad.status = AdvertisementStatus.BOUGHT
         ad.buyerId = buyerId
         ad.ended = true

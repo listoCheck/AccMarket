@@ -38,7 +38,7 @@ class NotificationService(
         //notificationRepository.saveAndFlush(notification)
 
         try {
-            user.email?.takeIf { it.isNotBlank() }?.let { email ->
+            user.email.takeIf { it.isNotBlank() }?.let { email ->
                 println("EMAIL: $email")
                 mailService.sendEmail(to = email, subject = title, text = message)
             }
