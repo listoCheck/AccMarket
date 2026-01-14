@@ -1,0 +1,273 @@
+
+###
+
+### 1️⃣ ЛОГИН → получаем access / refresh / userId
+POST http://localhost:{{SPRING_PORT}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{USERNAME}}",
+  "password": "{{PASSWORD}}"
+}
+
+> {%
+    const data = response.body.body; // <- обращаемся к вложенному body
+    client.global.set("ACCESS_TOKEN", data.accessToken);
+    client.global.set("REFRESH_TOKEN", data.refreshToken);
+    client.global.set("USER_ID", data.userId);
+    client.global.set("JWT", "Bearer " + data.accessToken);
+
+    console.log("ACCESS_TOKEN =", client.global.get("ACCESS_TOKEN"));
+    console.log("REFRESH_TOKEN =", client.global.get("REFRESH_TOKEN"));
+    console.log("JWT =", client.global.get("JWT"));
+    console.log("USER_ID =", client.global.get("USER_ID"));
+%}
+
+
+###
+
+### 2️⃣ ОБНОВЛЕНИЕ ACCESS ТОКЕНА
+POST http://localhost:{{SPRING_PORT}}/api/v1/auth/update-token
+Content-Type: application/json
+
+{
+  "username": "{{USERNAME}}",
+  "token": "{{REFRESH_TOKEN}}"
+}
+
+> {%
+    console.log(response);
+    client.global.set("ACCESS_TOKEN", response.body.body.accessToken);
+    client.global.set("JWT", "Bearer " + response.body.body.accessToken);
+%}
+
+###
+
+### 3️⃣ СОЗДАНИЕ ОБЪЯВЛЕНИЯ
+POST http://localhost:{{SPRING_PORT}}/api/v1/core/make-advertisement
+Content-Type: application/json
+
+{
+  "username": "{{USERNAME}}",
+  "token": "{{ACCESS_TOKEN}}",
+  "title": "Тестовый аккаунт",
+  "text": "Текст объявления пидор",
+  "cost": 1000,
+  "platform": "PC",
+  "genre": "RPG",
+  "gameLogin": "game_login",
+  "gamePassword": "game_password",
+  "advertisementId": null
+}
+
+> {%
+    console.log(response);
+    client.global.set("ADVERTISEMENT_ID", response.body.body.token);
+%}
+
+###
+
+### 4️⃣ BALANCE: Пополнение баланса
+POST http://localhost:{{SPRING_PORT}}/api/v1/balance/deposit
+Content-Type: application/json
+
+{
+  "userId": "{{USER_ID}}",
+  "amount": 500
+}
+
+###
+
+### 5️⃣ BALANCE: Снятие средств
+POST http://localhost:{{SPRING_PORT}}/api/v1/balance/withdraw
+Content-Type: application/json
+
+{
+  "userId": "{{USER_ID}}",
+  "amount": 200
+}
+> {%
+    console.log(response);
+%}
+
+###
+
+### 6️⃣ BALANCE: Получение баланса
+GET http://localhost:{{SPRING_PORT}}/api/v1/balance/{{USER_ID}}
+
+###
+### 7️⃣ APPEALS: Создание апелляции
+POST http://localhost:{{SPRING_PORT}}/api/v1/appeals
+Content-Type: application/json
+
+{
+  "advertisementId": "{{ADVERTISEMENT_ID}}"
+}
+
+> {%
+    console.log(response);
+    client.global.set("APPEAL_ID", response.body.id);
+%}
+
+### 8 MODERATION: Модерация объявления (админ)
+POST http://localhost:{{SPRING_PORT}}/api/v1/admin/moderation
+Content-Type: application/json
+
+{
+  "adminId": "{{ADMIN_ID}}",
+  "advertisementId": "{{ADVERTISEMENT_ID}}",
+  "decision": "APPROVED",
+  "comment": "Тестовая модерация"
+}
+
+###
+
+### 9️ MODERATION: Получение результата модерации
+GET http://localhost:{{SPRING_PORT}}/api/v1/admin/moderation/5addeeca-a56e-4f2b-b62b-b292b3e79d0a
+
+###
+
+
+
+###
+
+### 🔟 APPEALS: Решение апелляции (админ)
+POST http://localhost:{{SPRING_PORT}}/api/v1/appeals/decide
+Content-Type: application/json
+
+{
+  "appealId": "{{APPEAL_ID}}",
+  "status": "APPROVED",
+  "decision": "Тестовое решение"
+}
+
+###
+
+### 1️⃣1️⃣ APPEALS: Получение ожидающих апелляций
+GET http://localhost:{{SPRING_PORT}}/api/v1/appeals/pending
+
+###
+
+### 1️⃣2️⃣ NOTIFICATIONS: Создание уведомления (для теста)
+POST http://localhost:{{SPRING_PORT}}/api/v1/notifications/user/{{USER_ID}}
+Content-Type: application/json
+
+{
+  "userId": "{{USER_ID}}",
+  "title": "Тестовое уведомление",
+  "message": "Сообщение уведомления"
+}
+
+> {%
+    console.log(response);
+    client.global.set("NOTIFICATION_ID", response.body.notificationId);
+%}
+
+###
+
+### 1️⃣3️⃣ NOTIFICATIONS: Получение всех уведомлений
+GET http://localhost:{{SPRING_PORT}}/api/v1/notifications/user/{{USER_ID}}
+
+###
+
+### 1️⃣4️⃣ NOTIFICATIONS: Получение непрочитанных уведомлений
+GET http://localhost:{{SPRING_PORT}}/api/v1/notifications/user/{{USER_ID}}/unread
+
+###
+
+### 1️⃣5️⃣ NOTIFICATIONS: Пометить уведомление как прочитанное
+POST http://localhost:{{SPRING_PORT}}/api/v1/notifications/read/{{NOTIFICATION_ID}}?userId={{USER_ID}}
+
+###
+
+### 1️⃣6️⃣ NOTIFICATIONS: Пометить все уведомления как прочитанные
+POST http://localhost:{{SPRING_PORT}}/api/v1/notifications/read-all/{{USER_ID}}
+
+###
+
+### 1️⃣7️⃣ ADMIN: Назначение администратора
+POST http://localhost:{{SPRING_PORT}}/api/v1/admin/roles/assign-admin
+Content-Type: application/json
+
+{
+  "username": "{{USERNAME}}",
+  "adminSecret": "228",
+  "email": "test@example.com"
+}
+
+###
+
+### 1️⃣8️⃣ ADMIN: Получение ролей пользователя
+POST http://localhost:{{SPRING_PORT}}/api/v1/admin/roles/user
+Content-Type: application/json
+
+{
+  "username": "{{USERNAME}}",
+  "token": "{{ACCESS_TOKEN}}",
+  "targetUsername": "{{USERNAME}}"
+}
+> {%
+    console.log(response);
+%}
+
+###
+
+### 1️⃣9️⃣ ADMIN: Обновление ролей пользователя
+PATCH http://localhost:{{SPRING_PORT}}/api/v1/admin/roles/update
+Content-Type: application/json
+
+{
+  "username": "{{USERNAME}}",
+  "token": "{{ACCESS_TOKEN}}",
+  "targetUsername": "{{USERNAME}}",
+  "roles": ["USER","MODERATOR"]
+}
+> {%
+    console.log(response);
+%}
+
+###
+
+### 2️⃣0️⃣ ADMIN: Получение всех пользователей
+POST http://localhost:{{SPRING_PORT}}/api/v1/admin/roles/all-users
+Content-Type: application/json
+
+{
+  "username": "{{USERNAME}}",
+  "token": "{{ACCESS_TOKEN}}"
+}
+> {%
+    console.log(response);
+%}
+
+###
+
+### 2️⃣1️⃣ ADMIN: Получение объявлений пользователя
+GET http://localhost:{{SPRING_PORT}}/api/v1/admin/roles/get-advertisements?userId={{USER_ID}}&page=0&size=10&
+    sortBy=createdAt
+
+###
+
+### 2️⃣2️⃣ ADMIN: Назначение модератора
+POST http://localhost:{{SPRING_PORT}}/api/v1/admin/roles/assign-moderator
+Content-Type: application/json
+
+{
+  "adminId": "{{ADMIN_ID}}",
+  "adminToken": "{{ACCESS_TOKEN}}",
+  "moderatorId": "{{MODERATOR_ID}}"
+}
+
+###
+
+### 2️⃣3️⃣ ЛОГАУТ
+POST http://localhost:{{SPRING_PORT}}/api/v1/auth/logout
+Content-Type: application/json
+
+{
+  "username": "{{USERNAME}}",
+  "token": "{{REFRESH_TOKEN}}"
+}
+> {%
+    console.log(response);
+%}

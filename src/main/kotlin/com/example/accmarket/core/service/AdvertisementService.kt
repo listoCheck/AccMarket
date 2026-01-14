@@ -50,8 +50,7 @@ class AdvertisementService(
             return Response(code = 400, message = "Token not found or invalid")
 
         val bannedWords = banwordService.find("${request.title} ${request.text}")
-
-        // Создаем Advertisement
+        println(bannedWords + bannedWords.isNotEmpty())
         val adv = Advertisement(
             userId = user.id,
             title = request.title,
@@ -65,7 +64,6 @@ class AdvertisementService(
             createdAt = Date()
         )
 
-        // Создаем Type и присваиваем объект Advertisement
         val type = Type(
             advertisement = adv,
             platform = request.platform,
@@ -73,7 +71,6 @@ class AdvertisementService(
         )
         adv.type = type
 
-        // Создаем GameAccount
         val gameAccount = GameAccount(
             advertisement = adv,
             login = request.gameLogin,
@@ -81,10 +78,8 @@ class AdvertisementService(
         )
         adv.gameAccount = gameAccount
 
-        // Сохраняем Advertisement, Hibernate автоматически сохранит связанные объекты
         advertisementRepository.saveAndFlush(adv)
 
-        // Отправка уведомления после успешной транзакции
         sendAfterCommit {
             notificationService.send(
                 user.id,

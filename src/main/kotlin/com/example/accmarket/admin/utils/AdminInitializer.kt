@@ -1,10 +1,12 @@
 package com.example.accmarket.admin.utils
 
 
+import com.example.accmarket.admin.models.Admin
 import com.example.accmarket.auth.models.Token
 import com.example.accmarket.auth.models.User
 import com.example.accmarket.auth.repository.TokenRepository
 import com.example.accmarket.auth.repository.UserRepository
+import com.example.accmarket.rolemanagement.repository.AdminSecretRepository
 import com.example.accmarket.utils.JWT.JwtProvider
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -17,7 +19,8 @@ class AdminInitializer(
     private val userRepository: UserRepository,
     private val tokenRepository: TokenRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val jwtProvider: JwtProvider
+    private val jwtProvider: JwtProvider,
+    private val adminSecretRepository: AdminSecretRepository,
 ) : ApplicationRunner {
 
     override fun run(args: ApplicationArguments) {
@@ -48,6 +51,12 @@ class AdminInitializer(
         val accessToken = jwtProvider.createAccessToken(
             "admin", listOf("ADMIN")
         )
+        val adminRecord = Admin(
+            userId = admin.id,
+            isActive = true,
+            description = "Assigned admin role",
+        )
+        adminSecretRepository.save(adminRecord)
 
         println("======================================")
         println(" ADMIN USER CREATED ")

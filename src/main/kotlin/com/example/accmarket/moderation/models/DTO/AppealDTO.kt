@@ -12,3 +12,13 @@ data class AppealDecisionDTO(
     val status: AdvertisementStatus,
     val decision: String?
 )
+
+data class AppealResponseDTO(
+    val id: UUID,
+    val advertisementId: UUID,
+    val adTitle: String,
+    val status: AdvertisementStatus,
+    val decision: String?,
+    val createdAt: Date,
+    val decidedAt: Date?
+)

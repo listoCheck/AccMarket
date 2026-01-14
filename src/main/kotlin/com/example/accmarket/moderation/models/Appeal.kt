@@ -10,7 +10,7 @@ data class Appeal(
 
     @Id
     @GeneratedValue
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "advertisement_id", nullable = false)
@@ -28,5 +28,8 @@ data class Appeal(
     val createdAt: Date = Date(),
 
     @Temporal(TemporalType.TIMESTAMP)
-    var decidedAt: Date? = null
+    var decidedAt: Date? = null,
+
+    @Version
+    var version: Long? = null
 )

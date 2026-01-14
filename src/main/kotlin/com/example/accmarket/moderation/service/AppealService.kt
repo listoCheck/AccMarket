@@ -6,12 +6,14 @@ import com.example.accmarket.moderation.models.Appeal
 import com.example.accmarket.moderation.models.AdvertisementStatus
 import com.example.accmarket.moderation.models.DTO.AppealCreateDTO
 import com.example.accmarket.moderation.models.DTO.AppealDecisionDTO
+import com.example.accmarket.moderation.models.DTO.AppealResponseDTO
 import com.example.accmarket.moderation.repository.AppealRepository
 import com.example.accmarket.notification.models.NotificationType
 import com.example.accmarket.notification.service.NotificationService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
+
 @Service
 class AppealService(
     private val appealRepository: AppealRepository,
@@ -20,16 +22,14 @@ class AppealService(
 ) {
 
     @Transactional
-    fun create(dto: AppealCreateDTO): Appeal {
+    fun create(dto: AppealCreateDTO): AppealResponseDTO {
         val ad = advertisementRepository.findById(dto.advertisementId)
             .orElseThrow { IllegalArgumentException("Advertisement not found") }
 
         if (ad.rejected != true)
             throw IllegalStateException("Appeal allowed only for rejected advertisements")
 
-        val appeal = appealRepository.save(
-            Appeal(advertisement = ad)
-        )
+        val appeal = appealRepository.save(Appeal(advertisement = ad))
 
         sendAfterCommit {
             notificationService.send(
@@ -40,12 +40,13 @@ class AppealService(
             )
         }
 
-        return appeal
+        return appeal.toDTO()
     }
 
     @Transactional
-    fun decide(dto: AppealDecisionDTO): Appeal {
-        val appeal = appealRepository.findById(dto.appealId)
+    fun decide(dto: AppealDecisionDTO): AppealResponseDTO {
+        val appealId = dto.appealId // теперь точно не null
+        val appeal = appealRepository.findById(appealId)
             .orElseThrow { IllegalArgumentException("Appeal not found") }
 
         if (appeal.status != AdvertisementStatus.PENDING)
@@ -69,21 +70,30 @@ class AppealService(
             )
         }
 
-        return saved
+        return saved.toDTO()
     }
 
-    fun getPending(): List<Appeal> =
+
+    fun getPending(): List<AppealResponseDTO> =
         appealRepository.findAllByStatus(AdvertisementStatus.PENDING)
+            .map { it.toDTO() }
+
+    private fun Appeal.toDTO() = AppealResponseDTO(
+        id = this.id!!,
+        advertisementId = this.advertisement.id,
+        adTitle = this.advertisement.title,
+        status = this.status,
+        decision = this.decision,
+        createdAt = this.createdAt,
+        decidedAt = this.decidedAt
+    )
 
     private fun sendAfterCommit(action: () -> Unit) {
         org.springframework.transaction.support.TransactionSynchronizationManager
             .registerSynchronization(object :
                 org.springframework.transaction.support.TransactionSynchronization {
                 override fun afterCommit() {
-                    try {
-                        action()
-                    } catch (ex: Exception) {
-                    }
+                    try { action() } catch (ex: Exception) { }
                 }
             })
     }
