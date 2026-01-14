@@ -1,6 +1,7 @@
 package com.example.accmarket.notification.service
 
 import com.example.accmarket.auth.repository.UserRepository
+import com.example.accmarket.notification.models.DTO.NotificationCreateDTO
 import com.example.accmarket.notification.models.Notification
 import com.example.accmarket.notification.models.NotificationType
 import com.example.accmarket.notification.repository.NotificationRepository
@@ -47,7 +48,16 @@ class NotificationService(
         }
     }
 
-
+    fun sendForSystem(userId: UUID, type: NotificationType, title: String, message: String): Notification {
+        val notification = Notification(
+            userId = userId,
+            type = type,
+            title = title,
+            message = message,
+            createdAt = Date()
+        )
+        return notificationRepository.save(notification)
+    }
 
     fun getUserNotifications(userId: UUID): List<Notification> =
         notificationRepository.findAllByUserIdOrderByCreatedAtDesc(userId)
@@ -69,8 +79,18 @@ class NotificationService(
 
         return notification
     }
-
+    @Transactional
     fun markAllAsRead(userId: UUID) {
         notificationRepository.markAllAsReadByUserId(userId)
     }
+    fun create(dto: NotificationCreateDTO): Notification {
+        val notification = Notification(
+            userId = dto.userId,
+            type = dto.type,
+            title = dto.title,
+            message = dto.message
+        )
+        return notificationRepository.save(notification)
+    }
+
 }

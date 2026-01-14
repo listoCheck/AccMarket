@@ -148,20 +148,22 @@ GET http://localhost:{{SPRING_PORT}}/api/v1/appeals/pending
 
 ###
 
-### 1️⃣2️⃣ NOTIFICATIONS: Создание уведомления (для теста)
-POST http://localhost:{{SPRING_PORT}}/api/v1/notifications/user/{{USER_ID}}
-Content-Type: application/json
-
-{
-  "userId": "{{USER_ID}}",
-  "title": "Тестовое уведомление",
-  "message": "Сообщение уведомления"
-}
-
-> {%
-    console.log(response);
-    client.global.set("NOTIFICATION_ID", response.body.notificationId);
-%}
+#### 1️⃣2️⃣ NOTIFICATIONS: Создание уведомления (для теста)
+#POST http://localhost:{{SPRING_PORT}}/api/v1/notifications
+#Content-Type: application/json
+#
+#{
+#  "userId": "{{USER_ID}}",
+#  "type": "APPEAL_CREATED",
+#  "title": "Appeal submitted",
+#  "message": "Your appeal for advertisement {{ADVERTISEMENT_ID}} has been submitted and is under review."
+#}
+#
+#> {%
+#    console.log(response);
+#    const body = JSON.parse(response.body);
+#    client.global.set("NOTIFICATION_ID", body.id);
+#%}
 
 ###
 
@@ -176,7 +178,7 @@ GET http://localhost:{{SPRING_PORT}}/api/v1/notifications/user/{{USER_ID}}/unrea
 ###
 
 ### 1️⃣5️⃣ NOTIFICATIONS: Пометить уведомление как прочитанное
-POST http://localhost:{{SPRING_PORT}}/api/v1/notifications/read/{{NOTIFICATION_ID}}?userId={{USER_ID}}
+#POST http://localhost:{{SPRING_PORT}}/api/v1/notifications/read/{{NOTIFICATION_ID}}?userId={{USER_ID}}
 
 ###
 
@@ -253,9 +255,9 @@ POST http://localhost:{{SPRING_PORT}}/api/v1/admin/roles/assign-moderator
 Content-Type: application/json
 
 {
-  "adminId": "{{ADMIN_ID}}",
+  "adminId": "7ae8f54f-3076-4e47-bf3f-cda0cf108e6e",
   "adminToken": "{{ACCESS_TOKEN}}",
-  "moderatorId": "{{MODERATOR_ID}}"
+  "moderatorId": "7ae8f54f-3076-4e47-bf3f-cda0cf108e6e"
 }
 
 ###
