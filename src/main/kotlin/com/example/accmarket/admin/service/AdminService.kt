@@ -113,10 +113,10 @@ class AdminService(
     }
 
     fun getAllUsers(request: RoleManagementDTO): Response {
-        if (!tokenService.checkToken(request.token)) return Response(code = 401, message = "Invalid token")
+        if (!jwtProvider.verifyToken(request.token)) return ResponseHandler.invalidToken()
 
         val currentUser = userRepository.findByUsername(request.username)
-            ?: return Response(code = 404, message = "User not found")
+            ?: return ResponseHandler.userNotFound()
 
         if (!currentUser.roles.contains("ADMIN")) return Response(code = 403, message = "Admin access required")
 
@@ -124,6 +124,7 @@ class AdminService(
             mapOf(
                 "id" to user.id,
                 "username" to user.username,
+                "email" to user.email,
                 "roles" to user.roles
             )
         }

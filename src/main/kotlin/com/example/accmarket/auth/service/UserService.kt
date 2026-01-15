@@ -76,8 +76,9 @@ class UserService(
             ?: return ResponseHandler.userNotFound()
 
         return if (passwordEncoder.matches(password, user.password)) {
-            val refreshToken = jwtProvider.createRefreshToken(username, listOf("USER"), user.id)
-            val accessToken = jwtProvider.createAccessToken(username, listOf("USER"), user.id)
+            val userRoles = user.roles.toList()
+            val refreshToken = jwtProvider.createRefreshToken(username, userRoles, user.id)
+            val accessToken = jwtProvider.createAccessToken(username, userRoles, user.id)
             tokenRepository.updateUserToken(user.id, refreshToken)
 
             ResponseHandler.success(
@@ -117,8 +118,18 @@ class UserService(
         val tokenEntity = tokenRepository.findByUserId(user.id)
         if (tokenEntity.refreshToken != token) return ResponseHandler.invalidToken()
 
-        val newAccessToken = jwtProvider.createAccessToken(username, listOf("USER"), user.id)
-        return ResponseHandler.success(body = mapOf("accessToken" to newAccessToken))
+        val userRoles = user.roles.toList()
+        val newAccessToken = jwtProvider.createAccessToken(username, userRoles, user.id)
+        val newRefreshToken = jwtProvider.createRefreshToken(username, userRoles, user.id)
+        
+        tokenRepository.updateUserToken(user.id, newRefreshToken)
+        
+        return ResponseHandler.success(
+            body = mapOf(
+                "accessToken" to newAccessToken,
+                "refreshToken" to newRefreshToken
+            )
+        )
     }
 
     private fun sendAfterCommit(action: () -> Unit) {

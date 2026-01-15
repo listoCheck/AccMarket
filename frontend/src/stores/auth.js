@@ -1,6 +1,24 @@
 import { defineStore } from 'pinia'
 import { authAPI } from '../api/auth'
 
+// Функция для декодирования JWT токена
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    return JSON.parse(jsonPayload)
+  } catch (e) {
+    console.error('Error parsing JWT:', e)
+    return null
+  }
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
@@ -32,15 +50,18 @@ export const useAuthStore = defineStore('auth', {
           this.refreshToken = data.refreshToken
           this.username = username
           this.userId = data.userId
-          this.roles = ['USER']
+          
+          // Извлекаем роли из JWT токена
+          const tokenPayload = parseJwt(data.accessToken)
+          this.roles = tokenPayload?.roles || ['USER']
 
           localStorage.setItem('accessToken', data.accessToken)
           localStorage.setItem('refreshToken', data.refreshToken)
           localStorage.setItem('username', username)
           localStorage.setItem('userId', data.userId)
-          localStorage.setItem('roles', JSON.stringify(['USER']))
+          localStorage.setItem('roles', JSON.stringify(this.roles))
 
-          console.log('Registration successful, user logged in automatically')
+          console.log('Registration successful, user logged in automatically, roles:', this.roles)
           return { success: true, message: 'Регистрация успешна!' }
         }
         
@@ -67,17 +88,18 @@ export const useAuthStore = defineStore('auth', {
           this.username = username
           this.userId = data.userId
           
-          // Роли нужно получить отдельно или из токена
-          // Пока устанавливаем базовую роль USER
-          this.roles = ['USER']
+          // Извлекаем роли из JWT токена
+          const tokenPayload = parseJwt(data.accessToken)
+          console.log('Token payload:', tokenPayload)
+          this.roles = tokenPayload?.roles || ['USER']
 
           localStorage.setItem('accessToken', data.accessToken)
           localStorage.setItem('refreshToken', data.refreshToken)
           localStorage.setItem('username', username)
           localStorage.setItem('userId', data.userId)
-          localStorage.setItem('roles', JSON.stringify(['USER']))
+          localStorage.setItem('roles', JSON.stringify(this.roles))
 
-          console.log('Login data saved successfully')
+          console.log('Login data saved successfully, roles:', this.roles)
           return { success: true }
         }
         
@@ -155,7 +177,14 @@ export const useAuthStore = defineStore('auth', {
       this.refreshToken = localStorage.getItem('refreshToken')
       this.username = localStorage.getItem('username')
       this.userId = localStorage.getItem('userId')
-      this.roles = JSON.parse(localStorage.getItem('roles') || '[]')
+      
+      // Пытаемся извлечь роли из токена, если он есть
+      if (this.accessToken) {
+        const tokenPayload = parseJwt(this.accessToken)
+        this.roles = tokenPayload?.roles || JSON.parse(localStorage.getItem('roles') || '[]')
+      } else {
+        this.roles = JSON.parse(localStorage.getItem('roles') || '[]')
+      }
     }
   }
 })

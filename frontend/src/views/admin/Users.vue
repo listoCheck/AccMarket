@@ -36,13 +36,6 @@
           >
             Назначить админом
           </button>
-          <button
-            v-if="!user.roles.includes('MODERATOR') && !user.roles.includes('ADMIN')"
-            @click="assignRole(user, 'MODERATOR')"
-            class="btn btn-secondary btn-sm"
-          >
-            Назначить модератором
-          </button>
         </div>
       </div>
     </div>
@@ -73,12 +66,15 @@ export default {
           token: authStore.accessToken
         })
 
-        if (response.data.success) {
-          users.value = response.data.data || []
+        console.log('Users response:', response.data)
+        
+        if (response.data.code === 200 && response.data.body) {
+          users.value = response.data.body.users || []
         } else {
           error.value = response.data.message || 'Ошибка загрузки пользователей'
         }
       } catch (err) {
+        console.error('Error fetching users:', err)
         error.value = err.response?.data?.message || 'Ошибка загрузки пользователей'
       } finally {
         loading.value = false

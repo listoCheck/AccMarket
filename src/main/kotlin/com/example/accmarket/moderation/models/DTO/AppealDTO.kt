@@ -4,7 +4,8 @@ import com.example.accmarket.moderation.models.AdvertisementStatus
 import java.util.*
 
 data class AppealCreateDTO(
-    val advertisementId: UUID
+    val advertisementId: UUID,
+    val reason: String
 )
 
 data class AppealDecisionDTO(
@@ -17,6 +18,7 @@ data class AppealResponseDTO(
     val id: UUID,
     val advertisementId: UUID,
     val adTitle: String,
+    val reason: String,
     val status: AdvertisementStatus,
     val decision: String?,
     val createdAt: Date,

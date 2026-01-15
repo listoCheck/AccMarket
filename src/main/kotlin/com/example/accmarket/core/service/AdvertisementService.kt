@@ -332,6 +332,20 @@ class AdvertisementService(
             .map { AdvertisementResponseDTO.fromEntity(it) }
     }
 
+    fun getPendingModeration(
+        page: Int = 0,
+        size: Int = 10,
+        sortBy: String = "createdAt"
+    ): Page<AdvertisementResponseDTO> {
+        val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
+        val adsPage = advertisementRepository.findAllByStatusAndEnded(
+            AdvertisementStatus.MODERATION_PENDING,
+            false,
+            pageable
+        )
+        return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
+    }
+
     private fun sendAfterCommit(action: () -> Unit) {
         org.springframework.transaction.support.TransactionSynchronizationManager
             .registerSynchronization(object :

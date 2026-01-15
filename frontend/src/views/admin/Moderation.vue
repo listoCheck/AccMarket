@@ -24,13 +24,14 @@
       >
         <div class="ad-content">
           <h3>{{ ad.title }}</h3>
-          <p class="ad-description">{{ ad.description }}</p>
+          <p class="ad-description">{{ ad.text }}</p>
           <div class="ad-details">
-            <span class="ad-price">{{ ad.price }} ₽</span>
-            <span class="ad-type">{{ ad.type }}</span>
+            <span class="ad-price">{{ ad.cost }} ₽</span>
+            <span v-if="ad.platform" class="ad-badge platform">{{ ad.platform }}</span>
+            <span v-if="ad.genre" class="ad-badge genre">{{ ad.genre }}</span>
           </div>
           <div class="ad-meta">
-            <span>Автор: {{ ad.authorUsername }}</span>
+            <span class="ad-status" :class="'status-' + ad.status">{{ getStatusText(ad.status) }}</span>
             <span>{{ formatDate(ad.createdAt) }}</span>
           </div>
         </div>
@@ -121,30 +122,33 @@ export default {
       error.value = ''
       success.value = ''
 
-      const reason = decision === 'REJECTED' 
+      const comment = decision === 'REJECTED'
         ? prompt('Укажите причину отклонения:')
-        : ''
+        : null
 
-      if (decision === 'REJECTED' && !reason) {
+      if (decision === 'REJECTED' && !comment) {
         return
       }
 
       try {
         const response = await moderationAPI.moderate({
-          username: authStore.username,
-          token: authStore.accessToken,
+          adminId: authStore.userId,
           advertisementId: ad.id,
           decision,
-          reason
+          comment
         })
 
-        if (response.data.success) {
+        console.log('Moderation response:', response)
+        
+        // Backend возвращает объект Moderation напрямую, а не Response
+        if (response.status === 200 && response.data) {
           success.value = `Объявление ${decision === 'APPROVED' ? 'одобрено' : 'отклонено'}`
           await fetchAdvertisements(pagination.value.page)
         } else {
-          error.value = response.data.message || 'Ошибка модерации'
+          error.value = 'Ошибка модерации'
         }
       } catch (err) {
+        console.error('Moderation error:', err)
         error.value = err.response?.data?.message || 'Ошибка модерации'
       }
     }
@@ -159,6 +163,16 @@ export default {
       return date.toLocaleDateString('ru-RU')
     }
 
+    const getStatusText = (status) => {
+      const statusMap = {
+        'MODERATION_PENDING': 'На модерации',
+        'MODERATION_APPROVED': 'Одобрено',
+        'MODERATION_REJECTED': 'Отклонено',
+        'BOUGHT': 'Куплено'
+      }
+      return statusMap[status] || status
+    }
+
     onMounted(() => {
       fetchAdvertisements()
     })
@@ -171,7 +185,8 @@ export default {
       pagination,
       moderateAd,
       changePage,
-      formatDate
+      formatDate,
+      getStatusText
     }
   }
 }
@@ -246,12 +261,19 @@ export default {
   color: #27ae60;
 }
 
-.ad-type {
-  background: #3498db;
+.ad-badge {
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 4px;
   font-size: 0.875rem;
+}
+
+.ad-badge.platform {
+  background: #3498db;
+}
+
+.ad-badge.genre {
+  background: #9b59b6;
 }
 
 .ad-meta {
@@ -259,6 +281,34 @@ export default {
   gap: 1rem;
   font-size: 0.875rem;
   color: #95a5a6;
+  align-items: center;
+}
+
+.ad-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-MODERATION_PENDING {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-MODERATION_APPROVED {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-MODERATION_REJECTED {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-BOUGHT {
+  background: #d1ecf1;
+  color: #0c5460;
 }
 
 .ad-actions {

@@ -9,8 +9,8 @@ export const notificationsAPI = {
     return apiClient.get(`/notifications/user/${userId}/unread`)
   },
 
-  markAsRead(notificationId) {
-    return apiClient.post(`/notifications/read/${notificationId}`)
+  markAsRead(notificationId, userId) {
+    return apiClient.post(`/notifications/read/${notificationId}?userId=${userId}`)
   },
 
   markAllAsRead(userId) {

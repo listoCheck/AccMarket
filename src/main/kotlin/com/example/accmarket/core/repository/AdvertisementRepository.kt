@@ -1,6 +1,7 @@
 package com.example.accmarket.core.repository
 
 import com.example.accmarket.core.models.Advertisement
+import com.example.accmarket.core.models.AdvertisementStatus
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
@@ -29,6 +30,12 @@ interface AdvertisementRepository : JpaRepository<Advertisement, UUID> {
     
     fun findAllByUserIdAndEnded(
         userId: UUID,
+        ended: Boolean,
+        pageable: Pageable
+    ): Page<Advertisement>
+
+    fun findAllByStatusAndEnded(
+        status: AdvertisementStatus,
         ended: Boolean,
         pageable: Pageable
     ): Page<Advertisement>

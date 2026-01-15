@@ -1,6 +1,7 @@
 package com.example.accmarket.moderation.service
 
 
+import com.example.accmarket.core.models.AdvertisementStatus as CoreAdvertisementStatus
 import com.example.accmarket.core.repository.AdvertisementRepository
 import com.example.accmarket.moderation.models.Appeal
 import com.example.accmarket.moderation.models.AdvertisementStatus
@@ -29,7 +30,7 @@ class AppealService(
         if (ad.rejected != true)
             throw IllegalStateException("Appeal allowed only for rejected advertisements")
 
-        val appeal = appealRepository.save(Appeal(advertisement = ad))
+        val appeal = appealRepository.save(Appeal(advertisement = ad, reason = dto.reason))
 
         sendAfterCommit {
             notificationService.send(
@@ -45,7 +46,7 @@ class AppealService(
 
     @Transactional
     fun decide(dto: AppealDecisionDTO): AppealResponseDTO {
-        val appealId = dto.appealId // теперь точно не null
+        val appealId = dto.appealId
         val appeal = appealRepository.findById(appealId)
             .orElseThrow { IllegalArgumentException("Appeal not found") }
 
@@ -55,6 +56,22 @@ class AppealService(
         appeal.status = dto.status
         appeal.decision = dto.decision
         appeal.decidedAt = Date()
+
+        // Обновляем статус объявления в зависимости от решения по апелляции
+        val advertisement = appeal.advertisement
+        when (dto.status) {
+            AdvertisementStatus.APPROVED -> {
+                advertisement.status = CoreAdvertisementStatus.MODERATION_APPROVED
+                advertisement.rejected = false
+            }
+            AdvertisementStatus.REJECTED -> {
+                // Объявление остается отклоненным
+                advertisement.status = CoreAdvertisementStatus.MODERATION_REJECTED
+                advertisement.rejected = true
+            }
+            else -> {}
+        }
+        advertisementRepository.save(advertisement)
 
         val saved = appealRepository.save(appeal)
 
@@ -66,7 +83,10 @@ class AppealService(
                 else
                     NotificationType.APPEAL_REJECTED,
                 title = "Appeal decision",
-                message = dto.decision ?: "Decision has been made for your appeal."
+                message = if (dto.status == AdvertisementStatus.APPROVED)
+                    "Your appeal for advertisement \"${advertisement.title}\" has been approved. Your advertisement is now published."
+                else
+                    dto.decision ?: "Your appeal has been rejected."
             )
         }
 
@@ -82,6 +102,7 @@ class AppealService(
         id = this.id!!,
         advertisementId = this.advertisement.id,
         adTitle = this.advertisement.title,
+        reason = this.reason,
         status = this.status,
         decision = this.decision,
         createdAt = this.createdAt,

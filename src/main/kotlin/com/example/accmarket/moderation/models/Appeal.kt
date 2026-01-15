@@ -16,6 +16,9 @@ data class Appeal(
     @JoinColumn(name = "advertisement_id", nullable = false)
     val advertisement: Advertisement,
 
+    @Column(nullable = false, length = 1000)
+    val reason: String,
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var status: AdvertisementStatus = AdvertisementStatus.PENDING,

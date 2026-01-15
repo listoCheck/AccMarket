@@ -65,9 +65,15 @@ export default {
       error.value = ''
 
       try {
+        console.log('Fetching notifications for userId:', authStore.userId)
         const response = await notificationsAPI.getAll(authStore.userId)
+        console.log('Notifications response:', response)
+        console.log('Response data:', response.data)
         notifications.value = response.data || []
+        console.log('Notifications loaded:', notifications.value.length)
       } catch (err) {
+        console.error('Error fetching notifications:', err)
+        console.error('Error response:', err.response)
         error.value = err.response?.data?.message || 'Ошибка загрузки уведомлений'
       } finally {
         loading.value = false
@@ -78,7 +84,7 @@ export default {
       if (notification.isRead) return
 
       try {
-        await notificationsAPI.markAsRead(notification.id)
+        await notificationsAPI.markAsRead(notification.id, authStore.userId)
         notification.isRead = true
       } catch (err) {
         console.error('Error marking notification as read:', err)

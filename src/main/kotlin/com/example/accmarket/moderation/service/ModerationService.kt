@@ -1,5 +1,6 @@
 package com.example.accmarket.moderation.service
 
+import com.example.accmarket.core.models.AdvertisementStatus
 import com.example.accmarket.core.repository.AdvertisementRepository
 import com.example.accmarket.moderation.models.DTO.ModerationDTO
 import com.example.accmarket.moderation.models.Moderation
@@ -29,8 +30,16 @@ class ModerationService(
             admin = admin, advertisement = ad, decision = dto.decision, comment = dto.comment
         )
 
-        if (dto.decision == ModerationDecision.APPROVED) {
-            ad.rejected = dto.decision == ModerationDecision.REJECTED
+        // Обновляем статус и флаг rejected в зависимости от решения модерации
+        when (dto.decision) {
+            ModerationDecision.APPROVED -> {
+                ad.status = AdvertisementStatus.MODERATION_APPROVED
+                ad.rejected = false
+            }
+            ModerationDecision.REJECTED -> {
+                ad.status = AdvertisementStatus.MODERATION_REJECTED
+                ad.rejected = true
+            }
         }
 
         advertisementRepository.save(ad)

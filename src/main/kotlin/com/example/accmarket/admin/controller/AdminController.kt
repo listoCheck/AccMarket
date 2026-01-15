@@ -95,19 +95,18 @@ class AdminController(
 
     @GetMapping("/get-advertisements")
     @Operation(
-        summary = "Получить объявления пользователя",
-        description = "Возвращает страницы объявлений пользователя",
+        summary = "Получить объявления на модерации",
+        description = "Возвращает страницы объявлений, ожидающих модерации",
         responses = [
             ApiResponse(responseCode = "200", description = "Список объявлений успешно получен", content = [Content(schema = Schema(implementation = AdvertisementResponseDTO::class))])
         ]
     )
     fun getAdvertisements(
-        @RequestParam(required = false) userId: String?,
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int,
         @RequestParam(defaultValue = "createdAt") sortBy: String
     ): Page<AdvertisementResponseDTO> {
-        return advertisementService.getAdvertisements(userId, page, size, sortBy, rejected = true)
+        return advertisementService.getPendingModeration(page, size, sortBy)
     }
 
     @PostMapping("/assign-moderator")
