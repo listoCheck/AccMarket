@@ -2,6 +2,7 @@ package com.example.accmarket.admin.models
 import com.example.accmarket.utils.Json.JsonbConverter
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.persistence.*
+import org.hibernate.annotations.Type
 import java.util.*
 
 @Entity
@@ -17,7 +18,4 @@ data class Admin(
     @Column
     var description: String? = null,
 
-    @Column(columnDefinition = "jsonb")
-    @Convert(converter = JsonbConverter::class)
-    var statistics: Map<String, Any> = emptyMap()
 )

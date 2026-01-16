@@ -48,7 +48,8 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import { adminAPI } from '../../api/admin'
+import { adminAPI, appealsAPI } from '../../api/admin'
+import { advertisementsAPI } from '../../api/advertisements'
 import { useAuthStore } from '../../stores/auth'
 
 export default {
@@ -69,8 +70,34 @@ export default {
           username: authStore.username,
           token: authStore.accessToken
         })
-        if (usersResponse.data.success) {
-          stats.value.totalUsers = usersResponse.data.data?.length || 0
+        console.log('Stats users response:', usersResponse.data)
+        if (usersResponse.data.code === 200 && usersResponse.data.body) {
+          stats.value.totalUsers = usersResponse.data.body.users?.length || 0
+        }
+
+        // Fetch active advertisements (rejected=false)
+        const activeAdsResponse = await advertisementsAPI.getAll({ page: 0, size: 1000 })
+        console.log('Stats active ads response:', activeAdsResponse.data)
+        if (activeAdsResponse.data && activeAdsResponse.data.content) {
+          stats.value.activeAds = activeAdsResponse.data.content.filter(
+            ad => ad.status === 'MODERATION_APPROVED' && !ad.ended
+          ).length
+        }
+
+        // Fetch rejected/pending advertisements (rejected=true)
+        const rejectedAdsResponse = await adminAPI.getAdvertisements({ page: 0, size: 1000 })
+        console.log('Stats rejected ads response:', rejectedAdsResponse.data)
+        if (rejectedAdsResponse.data && rejectedAdsResponse.data.content) {
+          stats.value.pendingAds = rejectedAdsResponse.data.content.filter(
+            ad => ad.status === 'MODERATION_PENDING'
+          ).length
+        }
+
+        // Fetch pending appeals
+        const appealsResponse = await appealsAPI.getPending()
+        console.log('Stats appeals response:', appealsResponse.data)
+        if (appealsResponse.data && Array.isArray(appealsResponse.data)) {
+          stats.value.pendingAppeals = appealsResponse.data.length
         }
       } catch (error) {
         console.error('Error fetching stats:', error)

@@ -27,8 +27,8 @@
         >
           <div class="appeal-content">
             <h3>Апелляция #{{ appeal.id }}</h3>
-            <p><strong>Объявление:</strong> {{ appeal.advertisementId }}</p>
-            <p><strong>Причина:</strong> {{ appeal.reason }}</p>
+            <p><strong>Объявление:</strong> {{ appeal.adTitle }}</p>
+            <p><strong>Причина апелляции:</strong> {{ appeal.reason }}</p>
             <p class="appeal-date">{{ formatDate(appeal.createdAt) }}</p>
           </div>
 
@@ -50,44 +50,11 @@
       </div>
     </div>
 
-    <div class="user-section">
-      <h2>Создать апелляцию</h2>
-
-      <div v-if="createError" class="alert alert-error">
-        {{ createError }}
-      </div>
-
-      <div v-if="createSuccess" class="alert alert-success">
-        {{ createSuccess }}
-      </div>
-
-      <form @submit.prevent="createAppeal" class="appeal-form">
-        <div class="form-group">
-          <label for="advertisementId">ID объявления</label>
-          <input
-            id="advertisementId"
-            v-model="appealForm.advertisementId"
-            type="text"
-            required
-            placeholder="Введите ID отклоненного объявления"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="reason">Причина апелляции</label>
-          <textarea
-            id="reason"
-            v-model="appealForm.reason"
-            required
-            rows="4"
-            placeholder="Объясните, почему объявление должно быть одобрено"
-          ></textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary" :disabled="createLoading">
-          {{ createLoading ? 'Отправка...' : 'Отправить апелляцию' }}
-        </button>
-      </form>
+    <div v-else class="empty-state">
+      <p>У вас нет доступа к этой странице</p>
+      <router-link to="/profile" class="btn btn-primary">
+        Перейти в профиль
+      </router-link>
     </div>
   </div>
 </template>
@@ -105,14 +72,6 @@ export default {
     const loading = ref(false)
     const error = ref('')
     const success = ref('')
-
-    const appealForm = ref({
-      advertisementId: '',
-      reason: ''
-    })
-    const createLoading = ref(false)
-    const createError = ref('')
-    const createSuccess = ref('')
 
     const fetchPendingAppeals = async () => {
       if (!authStore.isAdmin) return
@@ -134,51 +93,29 @@ export default {
       error.value = ''
       success.value = ''
 
+      const comment = decision === 'REJECTED'
+        ? prompt('Укажите причину отклонения апелляции:')
+        : null
+
+      if (decision === 'REJECTED' && !comment) {
+        return
+      }
+
       try {
         const response = await appealsAPI.decide({
-          username: authStore.username,
-          token: authStore.accessToken,
           appealId: appeal.id,
-          decision
+          status: decision,
+          decision: comment
         })
 
-        if (response.data.success) {
+        if (response.status === 200 && response.data) {
           success.value = `Апелляция ${decision === 'APPROVED' ? 'одобрена' : 'отклонена'}`
           await fetchPendingAppeals()
         } else {
-          error.value = response.data.message || 'Ошибка обработки апелляции'
+          error.value = 'Ошибка обработки апелляции'
         }
       } catch (err) {
         error.value = err.response?.data?.message || 'Ошибка обработки апелляции'
-      }
-    }
-
-    const createAppeal = async () => {
-      createLoading.value = true
-      createError.value = ''
-      createSuccess.value = ''
-
-      try {
-        const response = await appealsAPI.create({
-          username: authStore.username,
-          token: authStore.accessToken,
-          advertisementId: appealForm.value.advertisementId,
-          reason: appealForm.value.reason
-        })
-
-        if (response.data.success) {
-          createSuccess.value = 'Апелляция успешно создана'
-          appealForm.value = {
-            advertisementId: '',
-            reason: ''
-          }
-        } else {
-          createError.value = response.data.message || 'Ошибка создания апелляции'
-        }
-      } catch (err) {
-        createError.value = err.response?.data?.message || 'Ошибка создания апелляции'
-      } finally {
-        createLoading.value = false
       }
     }
 
@@ -198,12 +135,7 @@ export default {
       loading,
       error,
       success,
-      appealForm,
-      createLoading,
-      createError,
-      createSuccess,
       decideAppeal,
-      createAppeal,
       formatDate
     }
   }
@@ -220,13 +152,11 @@ export default {
   margin-bottom: 2rem;
 }
 
-.admin-section,
-.user-section {
+.admin-section {
   margin-bottom: 3rem;
 }
 
-.admin-section h2,
-.user-section h2 {
+.admin-section h2 {
   color: #2c3e50;
   margin-bottom: 1.5rem;
 }
@@ -244,6 +174,10 @@ export default {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   color: #7f8c8d;
+}
+
+.empty-state p {
+  margin-bottom: 1rem;
 }
 
 .appeals-list {
@@ -286,42 +220,6 @@ export default {
   display: flex;
   gap: 0.5rem;
   flex-direction: column;
-}
-
-.appeal-form {
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  max-width: 600px;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #2c3e50;
-  font-weight: 500;
-}
-
-.form-group input,
-.form-group textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-family: inherit;
-  transition: border-color 0.3s;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #3498db;
 }
 
 .btn-sm {

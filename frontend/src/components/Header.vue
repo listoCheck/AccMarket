@@ -15,12 +15,8 @@
             <span v-if="unreadCount > 0" class="badge">{{ unreadCount }}</span>
           </router-link>
           
-          <router-link v-if="authStore.isModerator" to="/admin/moderation" class="nav-link">
-            Модерация
-          </router-link>
-          
           <router-link v-if="authStore.isAdmin" to="/admin" class="nav-link">
-            Админ-панель
+            Админка
           </router-link>
           
           <div class="user-info">

@@ -122,6 +122,51 @@ export const useAdvertisementsStore = defineStore('advertisements', {
       }
     },
 
+    async buyAdvertisement(advertisementId) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await advertisementsAPI.buy(advertisementId)
+        if (response.data.code === 200) {
+          return { success: true, message: response.data.message }
+        }
+        return { success: false, message: response.data.message }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Ошибка покупки объявления'
+        return { success: false, message: this.error }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchBoughtAdvertisements() {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await advertisementsAPI.getBought()
+        return { success: true, data: response.data }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Ошибка загрузки купленных объявлений'
+        return { success: false, message: this.error }
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchCreatedAdvertisements() {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await advertisementsAPI.getCreated()
+        return { success: true, data: response.data }
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Ошибка загрузки созданных объявлений'
+        return { success: false, message: this.error }
+      } finally {
+        this.loading = false
+      }
+    },
+
     setCurrentAdvertisement(advertisement) {
       this.currentAdvertisement = advertisement
     },

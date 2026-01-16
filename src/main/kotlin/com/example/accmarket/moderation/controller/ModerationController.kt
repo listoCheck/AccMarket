@@ -1,6 +1,7 @@
 package com.example.accmarket.moderation.controller
 
 import com.example.accmarket.moderation.models.DTO.ModerationDTO
+import com.example.accmarket.moderation.repository.ModerationRepository
 import com.example.accmarket.moderation.service.ModerationService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -15,7 +16,9 @@ import java.util.UUID
 @RestController
 @RequestMapping("/admin/moderation")
 class ModerationController(
-    private val moderationService: ModerationService
+    private val moderationService: ModerationService,
+    private val moderationRepository: ModerationRepository,
+    service: ModerationService
 ) {
 
     @Operation(
@@ -33,6 +36,8 @@ class ModerationController(
     )
     @ApiResponse(responseCode = "200", description = "Moderation result retrieved")
     @GetMapping("/{advertisementId}")
-    fun getByAdvertisement(@PathVariable advertisementId: UUID) =
-        moderationService.getByAdvertisement(advertisementId)
+    fun getByAdvertisementDTO(@PathVariable advertisementId: UUID): ModerationService.ModerationResponseDTO? {
+        val moderation = moderationService.getByAdvertisement(advertisementId)
+        return moderationService.toDTO(moderation)
+    }
 }

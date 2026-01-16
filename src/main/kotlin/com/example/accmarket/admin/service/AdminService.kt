@@ -1,5 +1,6 @@
 package com.example.accmarket.rolemanagement.service
 
+import com.example.accmarket.admin.models.Admin
 import com.example.accmarket.admin.models.DTO.AssignAdminRoleDTO
 import com.example.accmarket.admin.models.DTO.AssignModeratorRoleDTO
 import com.example.accmarket.auth.models.User
@@ -31,8 +32,6 @@ class AdminService(
     @Transactional
     fun assignAdminRole(request: AssignAdminRoleDTO): Response {
 
-        if (!jwtProvider.verifyToken(request.token.toString())) return ResponseHandler.invalidToken()
-
         val user = userRepository.findByUsername(request.username)
             ?: return ResponseHandler.userNotFound()
 
@@ -43,20 +42,28 @@ class AdminService(
         user.roles = user.roles.toMutableSet().apply { add("ADMIN") }
         userRepository.save(user)
 
+        val adminRecord = Admin(
+            userId = user.id,
+            isActive = true,
+            description = "Assigned admin role",
+        )
+        adminSecretRepository.save(adminRecord)
+
         sendAfterCommit {
             emailService.sendEmail(
                 to = user.email,
                 subject = "AccMarket",
                 text = """
-                    Привет, ${user.username}!
-                    
-                    Теперь вы стали админом проекта, вы можете модерировать объявления и блокировать пользователей.
-                """.trimIndent()
+                Привет, ${user.username}!
+                
+                Теперь вы стали админом проекта, вы можете модерировать объявления и блокировать пользователей.
+            """.trimIndent()
             )
         }
 
         return Response(code = 200, message = "Admin role assigned successfully")
     }
+
 
     fun getUserRoles(request: RoleManagementDTO): Response {
         if (!jwtProvider.verifyToken(request.token.toString())) return ResponseHandler.invalidToken()
@@ -106,10 +113,10 @@ class AdminService(
     }
 
     fun getAllUsers(request: RoleManagementDTO): Response {
-        if (!tokenService.checkToken(request.token)) return Response(code = 401, message = "Invalid token")
+        if (!jwtProvider.verifyToken(request.token)) return ResponseHandler.invalidToken()
 
         val currentUser = userRepository.findByUsername(request.username)
-            ?: return Response(code = 404, message = "User not found")
+            ?: return ResponseHandler.userNotFound()
 
         if (!currentUser.roles.contains("ADMIN")) return Response(code = 403, message = "Admin access required")
 
@@ -117,6 +124,7 @@ class AdminService(
             mapOf(
                 "id" to user.id,
                 "username" to user.username,
+                "email" to user.email,
                 "roles" to user.roles
             )
         }

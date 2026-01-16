@@ -11,6 +11,7 @@ import com.example.accmarket.core.models.DTO.AdvertisementDTO
 import com.example.accmarket.core.models.DTO.BoughtAdvertisementDTO
 import com.example.accmarket.core.models.DTO.BuyAdvertisementDTO
 import com.example.accmarket.core.models.DTO.DeleteAdvertisementDTO
+import com.example.accmarket.core.models.GameAccount
 import com.example.accmarket.core.models.Type
 import com.example.accmarket.core.repository.AdvertisementRepository
 import com.example.accmarket.core.repository.GameAccountRepository
@@ -49,23 +50,35 @@ class AdvertisementService(
             return Response(code = 400, message = "Token not found or invalid")
 
         val bannedWords = banwordService.find("${request.title} ${request.text}")
-
+        println(bannedWords + bannedWords.isNotEmpty())
         val adv = Advertisement(
             userId = user.id,
             title = request.title,
             text = request.text,
             cost = request.cost,
             rejected = bannedWords.isNotEmpty(),
+            status = if (bannedWords.isEmpty())
+                AdvertisementStatus.MODERATION_APPROVED
+            else
+                AdvertisementStatus.MODERATION_PENDING,
             createdAt = Date()
         )
 
-        adv.type = Type(
+        val type = Type(
             advertisement = adv,
             platform = request.platform,
             genre = request.genre
         )
+        adv.type = type
 
-        advertisementRepository.save(adv)
+        val gameAccount = GameAccount(
+            advertisement = adv,
+            login = request.gameLogin,
+            password = request.gamePassword
+        )
+        adv.gameAccount = gameAccount
+
+        advertisementRepository.saveAndFlush(adv)
 
         sendAfterCommit {
             notificationService.send(
@@ -99,6 +112,7 @@ class AdvertisementService(
         }
     }
 
+
     fun editAdvertisement(request: AdvertisementDTO): Response {
         val user = userRepository.findByUsername(request.username)
             ?: return Response(code = 400, message = "User not found")
@@ -122,6 +136,16 @@ class AdvertisementService(
             type?.platform = request.platform
             type?.genre = request.genre
         }
+
+
+        val account = gameAccountRepository.findByAdvertisementId(adv.id)
+            ?: throw IllegalStateException("Game account not found")
+
+        account.login = request.gameLogin
+        account.password = request.gamePassword
+
+        //gameAccountRepository.save(account)
+        adv.gameAccount = account
 
         advertisementRepository.save(adv)
 
@@ -199,20 +223,6 @@ class AdvertisementService(
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
     }
 
-    private fun sendAfterCommit(action: () -> Unit) {
-        org.springframework.transaction.support.TransactionSynchronizationManager
-            .registerSynchronization(object :
-                org.springframework.transaction.support.TransactionSynchronization {
-
-                override fun afterCommit() {
-                    try {
-                        action()
-                    } catch (_: Exception) {
-                    }
-                }
-            })
-    }
-
     fun getUserAdvertisementsByUserName(
         userName: String,
         page: Int = 0,
@@ -238,10 +248,9 @@ class AdvertisementService(
         sortBy: String = "createdAt",
     ): Page<AdvertisementResponseDTO> {
         val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
-        // Используем новый метод, который возвращает все объявления пользователя (и отклоненные, и принятые)
         val adsPage = advertisementRepository.findAllByUserIdAndEnded(
             userId,
-            false,  // только не завершенные
+            false,
             pageable
         )
         return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
@@ -270,6 +279,13 @@ class AdvertisementService(
             )
         )
 
+        balanceService.deposit(
+            BalanceOperationDTO(
+                userId = ad.userId,
+                amount = BigDecimal(ad.cost)
+            )
+        )
+
         ad.status = AdvertisementStatus.BOUGHT
         ad.buyerId = buyerId
         ad.ended = true
@@ -280,23 +296,22 @@ class AdvertisementService(
             ?: throw IllegalStateException("Game account not found")
 
         sendAfterCommit {
-            notificationService.send(
-                ad.userId,
-                NotificationType.AD_BOUGHT,
-                "Advertisement sold",
-                "Your advertisement \"${ad.title}\" was purchased."
-            )
-
-            notificationService.send(
-                buyerId,
-                NotificationType.AD_BOUGHT,
-                "Purchase successful",
-                "Login: ${gameAccount.login}\nPassword: ${gameAccount.password}"
-            )
+            safeSendNotification(ad.userId, "Advertisement sold", "Your advertisement \"${ad.title}\" was purchased.")
+            safeSendNotification(buyerId, "Purchase successful", "Login: ${gameAccount.login}\nPassword: ${gameAccount.password}")
         }
 
         return Response(code = 200, message = "Advertisement bought successfully")
     }
+
+    private fun safeSendNotification(userId: UUID, title: String, message: String) {
+        try {
+            notificationService.send(userId, NotificationType.AD_BOUGHT, title, message)
+        } catch (ex: Exception) {
+            println("Ошибка при отправке уведомления пользователю $userId: ${ex.message}")
+        }
+    }
+
+
 
     fun getBought(userId: UUID): List<BoughtAdvertisementDTO> {
         val ads = advertisementRepository.findAllByBuyerId(userId)
@@ -316,5 +331,35 @@ class AdvertisementService(
         return advertisementRepository.findAllByUserId(userId)
             .map { AdvertisementResponseDTO.fromEntity(it) }
     }
+
+    fun getPendingModeration(
+        page: Int = 0,
+        size: Int = 10,
+        sortBy: String = "createdAt"
+    ): Page<AdvertisementResponseDTO> {
+        val pageable = PageRequest.of(page, size, Sort.by(sortBy).descending())
+        val adsPage = advertisementRepository.findAllByStatusAndEnded(
+            AdvertisementStatus.MODERATION_PENDING,
+            false,
+            pageable
+        )
+        return adsPage.map { AdvertisementResponseDTO.fromEntity(it) }
+    }
+
+    private fun sendAfterCommit(action: () -> Unit) {
+        org.springframework.transaction.support.TransactionSynchronizationManager
+            .registerSynchronization(object :
+                org.springframework.transaction.support.TransactionSynchronization {
+
+                override fun afterCommit() {
+                    try {
+                        action()
+                    } catch (ex: Exception) {
+                        println("Ошибка при отправке уведомления: ${ex.message}")
+                    }
+                }
+            })
+    }
+
 
 }

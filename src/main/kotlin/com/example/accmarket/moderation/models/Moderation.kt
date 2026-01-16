@@ -11,7 +11,8 @@ data class Moderation(
 
     @Id
     @GeneratedValue
-    val id: UUID = UUID.randomUUID(),
+    val id: UUID? = null,
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id", nullable = false)
@@ -30,5 +31,8 @@ data class Moderation(
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false)
-    val decidedAt: Date = Date()
+    val decidedAt: Date = Date(),
+
+    @Version
+    var version: Long? = null
 )

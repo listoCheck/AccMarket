@@ -1,5 +1,7 @@
 package com.example.accmarket.notification.controller
 
+import com.example.accmarket.notification.models.DTO.NotificationCreateDTO
+import com.example.accmarket.notification.models.Notification
 import com.example.accmarket.notification.service.NotificationService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -37,4 +39,11 @@ class NotificationController(
     @ApiResponse(responseCode = "200", description = "All notifications marked as read")
     @PostMapping("/read-all/{userId}")
     fun markAll(@PathVariable userId: UUID) = notificationService.markAllAsRead(userId)
+
+    //@Operation(summary = "Create notification")
+    //@ApiResponse(responseCode = "200", description = "Notification created")
+    //@PostMapping("/")
+    //fun create(@RequestBody dto: NotificationCreateDTO): Notification =
+    //    notificationService.create(dto)
 }
+

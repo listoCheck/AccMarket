@@ -10,7 +10,7 @@ export const adminAPI = {
   },
 
   getUserRoles(data) {
-    return apiClient.get('/admin/roles/user', { data })
+    return apiClient.post('/admin/roles/user', data)
   },
 
   updateUserRoles(data) {
@@ -18,7 +18,7 @@ export const adminAPI = {
   },
 
   getAllUsers(data) {
-    return apiClient.get('/admin/roles/all-users', { data })
+    return apiClient.post('/admin/roles/all-users', data)
   },
 
   getAdvertisements(params = {}) {

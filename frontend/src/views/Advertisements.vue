@@ -18,10 +18,6 @@
 
     <div v-if="loading" class="loading">Загрузка...</div>
 
-    <div v-else-if="error" class="alert alert-error">
-      {{ error }}
-    </div>
-
     <div v-else-if="advertisements.length === 0" class="empty-state">
       <p>Объявлений пока нет</p>
     </div>
@@ -164,8 +160,15 @@ export default {
 
     const buyAdvertisement = async (ad) => {
       if (confirm(`Вы уверены, что хотите купить "${ad.title}" за ${ad.cost} ₽?`)) {
-        // TODO: Реализовать логику покупки через API
-        alert('Функция покупки будет реализована позже')
+        const result = await adsStore.buyAdvertisement(ad.id)
+        
+        if (result.success) {
+          alert('Объявление успешно куплено! Данные аккаунта отправлены в уведомления.')
+          // Обновляем список объявлений
+          fetchAdvertisements()
+        } else {
+          alert(result.message || 'Ошибка покупки объявления')
+        }
       }
     }
 
